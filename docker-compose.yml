@@ -1,0 +1,84 @@
+# Ambiente di sviluppo locale con MySQL/MariaDB reale.
+# Tutti i valori arrivano da .env (vedi .env.example).
+#
+#   npm run docker:up     avvia i container
+#   npm run docker:init   installa WordPress e attiva il tema (solo la prima volta)
+#   npm run docker:down   ferma i container
+#
+name: onthewall
+
+services:
+  db:
+    image: ${DB_IMAGE:-mariadb:11.4}
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-wordpress}
+      MARIADB_USER: ${DB_USER:-wordpress}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-wordpress}
+      MYSQL_USER: ${DB_USER:-wordpress}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-wordpress}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      # Esposta sull'host per potersi collegare con un client SQL esterno.
+      - "${DB_PORT:-3306}:3306"
+    healthcheck:
+      # Attende che il database accetti davvero connessioni prima di far
+      # partire WordPress, altrimenti il primo avvio fallisce.
+      test:
+        [
+          "CMD-SHELL",
+          "mariadb-admin ping -h 127.0.0.1 -u root -p$$MARIADB_ROOT_PASSWORD --silent || mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  wordpress:
+    image: ${WP_IMAGE:-wordpress:php8.3-apache}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${DB_NAME:-wordpress}
+      WORDPRESS_DB_USER: ${DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
+      WORDPRESS_DEBUG: ${WP_DEBUG:-1}
+    volumes:
+      - wp-core:/var/www/html
+      # Il tema resta la cartella del repo: modifichi e ricarichi.
+      - ./OnTheWall:/var/www/html/wp-content/themes/OnTheWall
+    ports:
+      - "${WP_PORT:-8080}:80"
+
+  wpcli:
+    image: ${WPCLI_IMAGE:-wordpress:cli-php8.3}
+    # Servizio "one-shot": non parte con docker compose up.
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+    # Stesso utente di Apache, altrimenti i file creati non sono scrivibili.
+    user: "33:33"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${DB_NAME:-wordpress}
+      WORDPRESS_DB_USER: ${DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
+    volumes:
+      - wp-core:/var/www/html
+      - ./OnTheWall:/var/www/html/wp-content/themes/OnTheWall
+    entrypoint: ["wp"]
+    command: ["--info"]
+
+volumes:
+  db-data:
+  wp-core:

@@ -1,0 +1,18 @@
+{
+  "name": "onthewall-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sito WordPress di Rick Ferruzzi — tema OnTheWall e ambiente di sviluppo locale",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs playground",
+    "docker:up": "node scripts/dev.mjs docker:up",
+    "docker:init": "node scripts/dev.mjs docker:init",
+    "docker:down": "node scripts/dev.mjs docker:down",
+    "docker:reset": "node scripts/dev.mjs docker:reset",
+    "docker:wp": "node scripts/dev.mjs docker:wp"
+  }
+}

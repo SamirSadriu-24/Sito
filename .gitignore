@@ -1,0 +1,21 @@
+# Configurazione locale (ognuno ha la sua — vedi .env.example)
+.env
+.env.local
+
+# Dipendenze
+node_modules/
+
+# Build / temporanei
+*.log
+_render-test.html
+.playground-tmp/
+
+# Sistema operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor
+.idea/
+*.swp
