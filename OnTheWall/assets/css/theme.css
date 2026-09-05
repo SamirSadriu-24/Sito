@@ -1,0 +1,36 @@
+/*
+ * OnTheWall — utility del tema.
+ *
+ * Sostituiscono gli attributi style="" presenti nella preview, così che
+ * nessuno stile venga scritto inline nel markup. Accodato dopo main.css.
+ */
+
+/* Densità della trama halftone. */
+.halftone-14 {
+	background-size: 14px 14px;
+}
+
+.halftone-11 {
+	background-size: 11px 11px;
+}
+
+/* Ritardi in sequenza dell'animazione spray-in. */
+.spray-delay-120 {
+	animation-delay: 120ms;
+}
+
+.spray-delay-240 {
+	animation-delay: 240ms;
+}
+
+.spray-delay-360 {
+	animation-delay: 360ms;
+}
+
+.spray-delay-440 {
+	animation-delay: 440ms;
+}
+
+.spray-delay-520 {
+	animation-delay: 520ms;
+}

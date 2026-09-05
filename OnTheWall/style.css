@@ -1,0 +1,20 @@
+/*
+Theme Name: OnTheWall
+Theme URI: https://rickferruzzi.com/
+Author: Rick Ferruzzi
+Author URI: https://rickferruzzi.com/
+Description: Tema WordPress per il portfolio di Rick Ferruzzi, artista neo-pop e street artist. Layout one-page neo-pop con griglia opere "The Wall", tipografia Anton/Inter/JetBrains Mono ed effetti spray, halftone e carta strappata.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: onthewall
+Tags: portfolio, one-column, custom-menu, translation-ready, block-styles
+*/
+
+/*
+ * Gli stili del tema sono in assets/css/main.css, accodato con wp_enqueue_style().
+ * Questo file contiene solo l'header del tema richiesto da WordPress.
+ */
