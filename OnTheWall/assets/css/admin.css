@@ -1,0 +1,45 @@
+/**
+ * Stili per le schermate wp-admin del tema OnTheWall.
+ * Caricato solo in bacheca, mai sul front-end.
+ */
+
+/* Stato nascosto dei controlli immagine (non dipendiamo dalla .hidden del core). */
+.onthewall-wall-manager .hidden {
+	display: none !important;
+}
+
+.onthewall-wall-table .onthewall-col-image {
+	width: 90px;
+}
+
+.onthewall-wall-table .onthewall-col-order {
+	width: 80px;
+}
+
+.onthewall-wall-table .onthewall-col-delete {
+	width: 90px;
+}
+
+.onthewall-wall-table td {
+	vertical-align: top;
+}
+
+.onthewall-wall-thumb {
+	display: block;
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+	background: #f0f0f1;
+	border: 1px solid #dcdcde;
+	border-radius: 2px;
+}
+
+.onthewall-media-actions {
+	margin: 6px 0 0;
+}
+
+.onthewall-media-actions .onthewall-media-remove {
+	display: inline-block;
+	margin-top: 4px;
+	color: #b32d2e;
+}

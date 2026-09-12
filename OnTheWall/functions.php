@@ -118,3 +118,5 @@ add_filter( 'wp_resource_hints', 'onthewall_resource_hints', 10, 2 );
 require_once get_template_directory() . '/inc/template-tags.php';
 require_once get_template_directory() . '/inc/post-types.php';
 require_once get_template_directory() . '/inc/class-onthewall-nav-walker.php';
+require_once get_template_directory() . '/inc/admin-artwork-manager.php';
+require_once get_template_directory() . '/inc/login-protection.php';
