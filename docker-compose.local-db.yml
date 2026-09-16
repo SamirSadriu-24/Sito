@@ -1,0 +1,53 @@
+# Override opzionale: rimette il database DENTRO Docker.
+#
+# Da usare solo con DB_MODE=local. Va sempre combinato col file base:
+#   docker compose -f docker-compose.yml -f docker-compose.local-db.yml up -d
+# I comandi npm lo aggiungono da soli quando DB_MODE=local.
+#
+# I dati finiscono nel volume Docker "db-data" (NON nella cartella del repo):
+# lo puoi ispezionare con  docker volume inspect onthewall_db-data
+# ATTENZIONE: "npm run docker:reset" lo cancella.
+
+services:
+  db:
+    image: ${DB_IMAGE:-mariadb:11.4}
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-wordpress}
+      MARIADB_USER: ${DB_USER:-wordpress}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-wordpress}
+      MYSQL_USER: ${DB_USER:-wordpress}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-wordpress}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      # Esposta sull'host per potersi collegare con un client SQL esterno.
+      - "${DB_PORT:-3306}:3306"
+    healthcheck:
+      # Attende che il database accetti davvero connessioni prima di far
+      # partire WordPress, altrimenti il primo avvio fallisce.
+      test:
+        [
+          "CMD-SHELL",
+          "mariadb-admin ping -h 127.0.0.1 -u root -p$$MARIADB_ROOT_PASSWORD --silent || mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  wordpress:
+    depends_on:
+      db:
+        condition: service_healthy
+
+  wpcli:
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
