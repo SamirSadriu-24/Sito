@@ -100,6 +100,57 @@ function requireDocker() {
 	}
 }
 
+/**
+ * Argomenti "-f" per docker compose.
+ *
+ * Con DB_MODE=local si aggiunge l'override che porta il database dentro
+ * Docker. Con DB_MODE=external resta il solo file base e WordPress si collega
+ * al server indicato in DB_HOST.
+ */
+function composeFiles(env) {
+	const files = ['-f', 'docker-compose.yml'];
+
+	if (dbMode(env) === 'local') {
+		files.push('-f', 'docker-compose.local-db.yml');
+	}
+
+	return files;
+}
+
+/** Modalità database normalizzata: "local" (default) oppure "external". */
+function dbMode(env) {
+	const mode = (env.DB_MODE || 'local').trim().toLowerCase();
+
+	if (mode !== 'local' && mode !== 'external') {
+		fail(`DB_MODE non valido in .env: "${env.DB_MODE}". Usa "local" oppure "external".`);
+	}
+
+	return mode;
+}
+
+/** Con un database esterno, DB_HOST deve essere impostato davvero. */
+function requireExternalDbHost(env) {
+	if (dbMode(env) !== 'external') return;
+
+	const host = (env.DB_HOST || '').trim();
+
+	if (!host || host === 'db:3306') {
+		fail(
+			'DB_MODE=external ma DB_HOST non punta a un server esterno.\n' +
+				'  Imposta in .env, per esempio:  DB_HOST=host.docker.internal:3306'
+		);
+	}
+}
+
+/** Riepilogo di dove stanno i dati, stampato agli avvii. */
+function describeDatabase(env) {
+	if (dbMode(env) === 'external') {
+		return `Database: ${env.DB_HOST} (esterno, i dati restano sul tuo server)`;
+	}
+
+	return 'Database: container locale, dati nel volume Docker "db-data"';
+}
+
 /** Attende che WordPress risponda sulla porta indicata. */
 async function waitForHttp(url, timeoutMs = 180000) {
 	const deadline = Date.now() + timeoutMs;
@@ -143,11 +194,13 @@ const commands = {
 	'docker:up'() {
 		requireDocker();
 		const env = loadEnv();
-		const status = run('docker', ['compose', 'up', '-d']);
+		requireExternalDbHost(env);
+
+		const status = run('docker', ['compose', ...composeFiles(env), 'up', '-d']);
 		if (status !== 0) return status;
 
 		console.log(`\n▸ WordPress: http://localhost:${env.WP_PORT || '8080'}`);
-		console.log(`  Database:  localhost:${env.DB_PORT || '3306'} (${env.DB_NAME}/${env.DB_USER})`);
+		console.log(`  ${describeDatabase(env)}`);
 		console.log('\n  Prima volta? Lancia:  npm run docker:init\n');
 		return 0;
 	},
@@ -156,16 +209,28 @@ const commands = {
 	async 'docker:init'() {
 		requireDocker();
 		const env = loadEnv();
+		requireExternalDbHost(env);
+
+		const files = composeFiles(env);
 		const port = env.WP_PORT || '8080';
 		const url = `http://localhost:${port}`;
 
-		if (run('docker', ['compose', 'up', '-d']) !== 0) return 1;
+		console.log(`\n▸ ${describeDatabase(env)}\n`);
+
+		if (run('docker', ['compose', ...files, 'up', '-d']) !== 0) return 1;
 		if (!(await waitForHttp(url))) {
-			fail('WordPress non ha risposto in tempo. Controlla:  docker compose logs wordpress');
+			fail(
+				'WordPress non ha risposto in tempo.\n' +
+					'  Controlla:  docker compose logs wordpress\n' +
+					(dbMode(env) === 'external'
+						? `  Con un database esterno verifica che ${env.DB_HOST} sia raggiungibile\n` +
+							`  dal container e che il database "${env.DB_NAME}" e l'utente esistano.`
+						: '')
+			);
 		}
 
 		const installed = runQuiet('docker', [
-			'compose', 'run', '--rm', 'wpcli', 'core', 'is-installed',
+			'compose', ...files, 'run', '--rm', 'wpcli', 'core', 'is-installed',
 		]);
 
 		if (installed.status === 0) {
@@ -173,7 +238,7 @@ const commands = {
 		} else {
 			console.log('→ Installo WordPress...');
 			const status = run('docker', [
-				'compose', 'run', '--rm', 'wpcli', 'core', 'install',
+				'compose', ...files, 'run', '--rm', 'wpcli', 'core', 'install',
 				`--url=${url}`,
 				`--title=${env.WP_SITE_TITLE || 'Rick Ferruzzi'}`,
 				`--admin_user=${env.WP_ADMIN_USER || 'admin'}`,
@@ -186,7 +251,7 @@ const commands = {
 
 		console.log('→ Attivo il tema OnTheWall...');
 		const activated = run('docker', [
-			'compose', 'run', '--rm', 'wpcli', 'theme', 'activate', 'OnTheWall',
+			'compose', ...files, 'run', '--rm', 'wpcli', 'theme', 'activate', 'OnTheWall',
 		]);
 		if (activated !== 0) return activated;
 
@@ -198,20 +263,29 @@ const commands = {
 	/** Ferma i container, mantenendo i dati. */
 	'docker:down'() {
 		requireDocker();
-		return run('docker', ['compose', 'down']);
+		const env = loadEnv();
+		return run('docker', ['compose', ...composeFiles(env), 'down']);
 	},
 
 	/** Cancella container E volumi: riparte da zero. */
 	'docker:reset'() {
 		requireDocker();
-		console.log('→ Elimino container e volumi (database compreso)...');
-		return run('docker', ['compose', 'down', '-v']);
+		const env = loadEnv();
+
+		if (dbMode(env) === 'external') {
+			console.log('→ Elimino container e volumi Docker.');
+			console.log(`  Il database esterno (${env.DB_HOST}) NON viene toccato.`);
+		} else {
+			console.log('→ Elimino container e volumi (database compreso)...');
+		}
+
+		return run('docker', ['compose', ...composeFiles(env), 'down', '-v']);
 	},
 
 	/** Passthrough a WP-CLI: npm run docker:wp -- plugin list */
 	'docker:wp'() {
 		requireDocker();
-		loadEnv();
+		const env = loadEnv();
 		// npm rimuove il "--" separatore, una chiamata diretta a node no.
 		const args = process.argv.slice(3).filter((arg, i) => !(i === 0 && arg === '--'));
 		if (args.length === 0) {
@@ -219,7 +293,7 @@ const commands = {
 			console.log('Es.: npm run docker:wp -- theme list');
 			return 1;
 		}
-		return run('docker', ['compose', 'run', '--rm', 'wpcli', ...args]);
+		return run('docker', ['compose', ...composeFiles(env), 'run', '--rm', 'wpcli', ...args]);
 	},
 };
 

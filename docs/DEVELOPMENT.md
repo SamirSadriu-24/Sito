@@ -75,14 +75,28 @@ puoi cambiare porte e credenziali senza rompere il setup dei colleghi.
 
 | Variabile | Default | A cosa serve |
 |---|---|---|
+| `DB_MODE` | `local` | `local` = database in container, `external` = server tuo |
+| `DB_HOST` | `db:3306` | host:porta del database (solo con `DB_MODE=external`) |
 | `DB_NAME` | `wordpress` | nome del database |
 | `DB_USER` / `DB_PASSWORD` | `wordpress` | utente applicativo |
-| `DB_ROOT_PASSWORD` | `root` | utente root del DB |
-| `DB_PORT` | `3306` | porta esposta sull'host per client SQL esterni |
-| `DB_IMAGE` | `mariadb:11.4` | motore del database |
+| `DB_ROOT_PASSWORD` | `root` | utente root del DB (solo `DB_MODE=local`) |
+| `DB_PORT` | `3306` | porta esposta sull'host per client SQL (solo `DB_MODE=local`) |
+| `DB_IMAGE` | `mariadb:11.4` | motore del database (solo `DB_MODE=local`) |
 | `WP_TABLE_PREFIX` | `wp_` | prefisso delle tabelle |
 | `WP_PORT` | `8080` | porta del sito |
 | `WP_DEBUG` | `1` | modalità debug di WordPress |
+
+### Dove finiscono i dati
+
+Con `DB_MODE=local` (default) il database gira in un container e i dati stanno
+nel **volume Docker** `db-data` — che **non** è dentro la cartella del progetto:
+vive nell'area di storage di Docker. Per vedere dove:
+
+```bash
+docker volume inspect onthewall_db-data
+```
+
+Attenzione: `npm run docker:reset` cancella quel volume, database compreso.
 
 Dopo aver modificato `.env`:
 
@@ -90,9 +104,47 @@ Dopo aver modificato `.env`:
 npm run docker:down && npm run docker:up
 ```
 
-Se cambi nome, utente o password del database su un volume già creato, devi
-azzerarlo: `npm run docker:reset` — le variabili di inizializzazione vengono
-lette solo alla creazione del volume.
+Solo con `DB_MODE=local`: se cambi nome, utente o password del database su un
+volume già creato, devi azzerarlo con `npm run docker:reset` — le variabili di
+inizializzazione vengono lette solo alla creazione del volume. Con
+`DB_MODE=external` queste modifiche le fai direttamente sul tuo server.
+
+### Usare un server di database esterno
+
+Se vuoi che i dati stiano su un database che gestisci tu (sul tuo PC, in rete
+locale o su un server remoto) invece che dentro Docker, nel `.env`:
+
+```
+DB_MODE=external
+DB_HOST=host.docker.internal:3306
+DB_NAME=wordpress
+DB_USER=wordpress
+DB_PASSWORD=la-tua-password
+```
+
+Valori tipici di `DB_HOST`:
+
+| Dove gira il database | `DB_HOST` |
+|---|---|
+| Sullo stesso PC che ospita Docker | `host.docker.internal:3306` |
+| Su un altro PC in rete locale | `192.168.1.50:3306` |
+| Su un server remoto o cloud | `mio-server.esempio.it:3306` |
+
+Poi si usano i comandi di sempre: `npm run docker:up` e `npm run docker:init`.
+Lo script capisce da `DB_MODE` che non deve avviare il container del database.
+
+**Tre cose da preparare sul server prima del primo avvio**, perché lo script
+non le può fare al posto tuo:
+
+1. Il database (`DB_NAME`) e l'utente (`DB_USER`) devono **esistere già**.
+2. L'utente deve poter entrare **dalla rete Docker**, non solo da `localhost`.
+   In MySQL/MariaDB significa un utente tipo `'wordpress'@'%'`, non
+   `'wordpress'@'localhost'`.
+3. Il server deve **accettare connessioni di rete**: se ascolta solo su
+   `127.0.0.1` (`bind-address`), il container non lo raggiunge.
+
+In questa modalità `npm run docker:reset` elimina i container e il volume di
+WordPress, ma **non tocca il tuo database**: i backup restano affar tuo.
 
 ### Usare MySQL invece di MariaDB
 

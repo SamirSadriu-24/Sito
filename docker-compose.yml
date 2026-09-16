@@ -1,56 +1,39 @@
-# Ambiente di sviluppo locale con MySQL/MariaDB reale.
-# Tutti i valori arrivano da .env (vedi .env.example).
+# Ambiente di sviluppo locale.
+#
+# Questo file, da solo, fa girare SOLO WordPress e si collega a un server
+# MySQL/MariaDB che gestisci tu (DB_MODE=external in .env). I dati del
+# database vivono sul tuo server, non dentro Docker.
+#
+# Per usare invece un database in container, aggiungi l'override:
+#   docker compose -f docker-compose.yml -f docker-compose.local-db.yml up -d
+# oppure imposta DB_MODE=local in .env e usa i comandi npm, che lo fanno da soli.
 #
 #   npm run docker:up     avvia i container
 #   npm run docker:init   installa WordPress e attiva il tema (solo la prima volta)
 #   npm run docker:down   ferma i container
 #
+# Tutti i valori arrivano da .env (vedi .env.example).
 name: onthewall
 
 services:
-  db:
-    image: ${DB_IMAGE:-mariadb:11.4}
-    restart: unless-stopped
-    environment:
-      MARIADB_DATABASE: ${DB_NAME:-wordpress}
-      MARIADB_USER: ${DB_USER:-wordpress}
-      MARIADB_PASSWORD: ${DB_PASSWORD:-wordpress}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${DB_NAME:-wordpress}
-      MYSQL_USER: ${DB_USER:-wordpress}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-wordpress}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
-    volumes:
-      - db-data:/var/lib/mysql
-    ports:
-      # Esposta sull'host per potersi collegare con un client SQL esterno.
-      - "${DB_PORT:-3306}:3306"
-    healthcheck:
-      # Attende che il database accetti davvero connessioni prima di far
-      # partire WordPress, altrimenti il primo avvio fallisce.
-      test:
-        [
-          "CMD-SHELL",
-          "mariadb-admin ping -h 127.0.0.1 -u root -p$$MARIADB_ROOT_PASSWORD --silent || mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent",
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-      start_period: 30s
-
   wordpress:
     image: ${WP_IMAGE:-wordpress:php8.3-apache}
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      # Host:porta del database. Con DB_MODE=external puntalo al tuo server:
+      #   - DB sul PC che ospita Docker ..... host.docker.internal:3306
+      #   - DB in rete locale o cloud ....... mio-server.esempio.it:3306
+      # Con l'override local-db resta il servizio "db" interno.
+      WORDPRESS_DB_HOST: ${DB_HOST:-db:3306}
       WORDPRESS_DB_NAME: ${DB_NAME:-wordpress}
       WORDPRESS_DB_USER: ${DB_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
       WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
       WORDPRESS_DEBUG: ${WP_DEBUG:-1}
+    extra_hosts:
+      # Rende "host.docker.internal" risolvibile anche su Linux, dove non
+      # esiste di serie. Su Docker Desktop è già disponibile e non dà fastidio.
+      - "host.docker.internal:host-gateway"
     volumes:
       - wp-core:/var/www/html
       # Il tema resta la cartella del repo: modifichi e ricarichi.
@@ -62,17 +45,16 @@ services:
     image: ${WPCLI_IMAGE:-wordpress:cli-php8.3}
     # Servizio "one-shot": non parte con docker compose up.
     profiles: ["tools"]
-    depends_on:
-      db:
-        condition: service_healthy
     # Stesso utente di Apache, altrimenti i file creati non sono scrivibili.
     user: "33:33"
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: ${DB_HOST:-db:3306}
       WORDPRESS_DB_NAME: ${DB_NAME:-wordpress}
       WORDPRESS_DB_USER: ${DB_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
       WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - wp-core:/var/www/html
       - ./OnTheWall:/var/www/html/wp-content/themes/OnTheWall
@@ -80,5 +62,4 @@ services:
     command: ["--info"]
 
 volumes:
-  db-data:
   wp-core:
