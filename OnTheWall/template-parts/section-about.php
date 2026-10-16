@@ -16,10 +16,6 @@ $onthewall_img = get_template_directory_uri() . '/assets/img/';
 
 		<div class="col-span-12 lg:col-span-7 lg:pr-6">
 
-			<div class="animate-spray inline-block -rotate-2 bg-accent px-3 py-1 font-mono text-xs uppercase tracking-[0.2em]">
-				<?php esc_html_e( 'anarchist · neo-pop artist', 'onthewall' ); ?>
-			</div>
-
 			<h1 class="mt-6 font-display leading-[0.95] tracking-tight text-balance">
 				<span class="animate-spray block text-[clamp(3rem,10vw,7rem)]">HELLO.</span>
 				<span class="animate-spray spray-delay-120 drip mt-2 inline-block bg-foreground px-3 text-[clamp(3rem,10vw,7rem)] text-background">I'M RICK.</span>
@@ -59,10 +55,6 @@ $onthewall_img = get_template_directory_uri() . '/assets/img/';
 				<img src="<?php echo esc_url( $onthewall_img . 'ig_09.jpg' ); ?>"
 					alt="<?php esc_attr_e( 'OGNUNO VIBRA — chimpanzee wheatpaste over newspaper collage by Rick Ferruzzi', 'onthewall' ); ?>"
 					width="482" height="640" loading="lazy" class="aspect-[5/4] w-full object-cover" />
-			</div>
-
-			<div class="absolute top-2 right-2 -rotate-6 bg-foreground px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-background">
-				<?php esc_html_e( 'no permission asked', 'onthewall' ); ?>
 			</div>
 
 		</div>
