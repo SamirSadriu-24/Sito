@@ -140,6 +140,12 @@ Due avvertenze imparate sul campo:
 ## Stato attuale e punti aperti
 
 - Il tema è completo e verificato identico alla preview.
+- Il cliente ha chiesto modifiche alla sezione About (issue #4, #5, #6). Le
+  modifiche approvate, quelle ancora da decidere e l'esito delle verifiche sono
+  in `docs/DECISIONI.md`. Sul branch `4-6-about-testi-e-nastri` il risultato
+  atteso non è più "121 elementi, 0 differenze": vale quanto scritto lì.
+- `npm run dev` non monta il tema (Playground parte dalla root del repo). Il
+  comando alternativo è in `docs/DECISIONI.md`.
 - `screenshot.png` non è incluso: andrebbe aggiunto (1200×900) per l'anteprima
   nella schermata Temi di WordPress.
 - La cartella `On-The-Wall/src/App.jsx` alla root è un residuo del vecchio
