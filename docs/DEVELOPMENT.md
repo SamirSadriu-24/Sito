@@ -6,7 +6,7 @@ Come far girare il sito in locale, su qualsiasi macchina (Windows, macOS, Linux)
 
 | | Serve per |
 |---|---|
-| **Node.js ≥ 20** | entrambi i profili (lo script di avvio è in Node) |
+| **Node.js ≥ 24.18** | entrambi i profili (lo script di avvio è in Node; i pacchetti di Playground richiedono la 24.18) |
 | **Docker Desktop** | solo per il profilo `docker` |
 
 Non serve installare PHP, MySQL, XAMPP, MAMP o simili.
@@ -36,7 +36,8 @@ npm run dev
 
 WordPress gira in **WebAssembly** con database **SQLite**. Non installa nulla sul
 sistema, non serve Docker, parte in pochi secondi. Il sito è su
-`http://127.0.0.1:9400` e sei già loggato come amministratore.
+`http://127.0.0.1:9400`, il tema OnTheWall è già attivo e sei già loggato come
+amministratore.
 
 Usalo per: lavorare sul tema, controllare il layout, modifiche a CSS e template.
 
@@ -118,6 +119,10 @@ In entrambi i profili la cartella `OnTheWall/` è montata dentro WordPress:
 Sito/OnTheWall  ──►  wp-content/themes/OnTheWall
 ```
 
+Playground riceve la cartella con `--path=OnTheWall`: la riconosce come tema, la
+monta e la attiva. Docker la monta come volume e `npm run docker:init` attiva il
+tema.
+
 Non c'è copia né sincronizzazione: modifichi un file, ricarichi la pagina, vedi
 il risultato. Non modificare mai i file del tema dentro il container o dentro la
 cartella di Playground — sono la stessa cosa, ma il repo è la fonte di verità.
@@ -136,6 +141,10 @@ macOS/Linux: `lsof -ti :9400 | xargs kill -9`
 **"WordPress is not ready yet"**
 Al primo avvio Playground scarica e installa WordPress. Attendi il messaggio
 `Ready!` nel terminale.
+
+**`npm warn EBADENGINE` all'avvio di `npm run dev`**
+La tua versione di Node è sotto la 24.18, il minimo dichiarato dai pacchetti di
+Playground. Aggiorna Node: con versioni più vecchie il funzionamento non è garantito.
 
 **`Failed to find stale Playground temp dirs: EACCES`**
 Avviso innocuo: Playground scansiona la cartella temporanea e inciampa in file
