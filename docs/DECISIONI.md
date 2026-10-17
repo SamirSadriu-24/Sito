@@ -36,21 +36,30 @@ Tutte toccano `OnTheWall/template-parts/section-about.php`.
 
 ## Stato della verifica sul branch `4-6-about-testi-e-nastri`
 
-Il confronto con il tema di `main` (stesso script della procedura in
-`CLAUDE.md`, con gli elementi abbinati per tag + classi + testo invece che per
-indice) ha dato lo stesso esito a 320 / 375 / 640 / 768 / 1024 / 1280 / 1440 px:
+Verifica del 17/10, sul commit `7585d2d`. Sostituisce quella del 16/10, fatta
+prima del paragrafo unico e del logo.
 
-- **118 elementi** invece di 121: mancano i due nastri e la riga rossa;
+**Come è stata fatta.** Due Playground affiancati: il tema di `main` (`05dc932`)
+su `:9401` e il branch su `:9400`. A ogni larghezza le due pagine sono misurate
+con le proprietà della procedura di `CLAUDE.md` (più `z-index` e
+`mix-blend-mode`), dopo la fine delle animazioni. Gli elementi sono abbinati per
+tag + classi + testo invece che per indice, perché il branch ha elementi in meno.
+La scrollbar coincide tra le due pagine a ogni larghezza.
+
+**Esito.** Identico a 320 / 375 / 640 / 768 / 1024 / 1280 / 1440 px:
+
+- **113 elementi** sul branch, 121 su `main`: 111 abbinati, 10 rimossi, 2 aggiunti;
+  - rimossi: i due nastri, la riga rossa, il secondo paragrafo, la colonna immagini (contenitore, trama halftone, due cornici, due immagini);
+  - aggiunti: il nuovo contenitore centrato e il logo;
 - il primo paragrafo cambia testo;
-- **0 differenze** di font, colori, spaziature, rotazioni e animazioni;
-- **0 differenze** orizzontali (x e larghezza);
-- cambiano solo le altezze dei blocchi con testo nuovo e la posizione verticale degli elementi che seguono.
+- **1 differenza di stile**, quella voluta: `z-index` di `#about` da `10` ad `auto`. Nessun'altra differenza di font, colori, spaziature, rotazioni o animazioni;
+- **0 differenze** orizzontali (x e larghezza) negli elementi abbinati;
+- cambiano le altezze di 5 blocchi: sezione `#about`, griglia della hero, colonna del testo, `<h1>` (una riga in meno), paragrafo (testo più lungo). Gli altri 93 elementi si spostano solo in verticale;
+- nessuno scroll orizzontale a nessuna larghezza.
 
-Questa verifica è stata fatta il 16/10, prima delle modifiche del 17/10
-(paragrafo unico e logo) e va ripetuta. Conteggio misurato il 17/10:
-**113 elementi**, cioè un `<p>` in meno e la colonna immagini (6 elementi)
-sostituita da contenitore + logo (2 elementi). Le differenze di stile attese
-riguardano solo la colonna del logo e lo z-index di `#about` (da 10 ad `auto`).
+**Logo.** Sotto i 1024 px va sotto il testo: 280 px a 320, 335 px a 375, 448 px
+(il massimo) a 640 e 768. Da 1024 px in su sta accanto al testo, centrato in
+verticale nella colonna: 392 px a 1024, 448 px a 1280 e 1440.
 
 ## Problema noto: `npm run dev` non carica il tema
 
