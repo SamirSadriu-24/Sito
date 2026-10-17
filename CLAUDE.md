@@ -27,7 +27,9 @@ Sito/                                    ← root del repo git
 │   ├── inc/                             template-tags, post-types, nav walker
 │   └── assets/css/  assets/img/
 ├── Rick Ferruzzi — …_files/             asset originali della preview
-├── docker-compose.yml  .env.example     ambiente di sviluppo
+├── docker-compose.yml                   WordPress + database esterno (DB_MODE)
+├── docker-compose.local-db.yml          override: database dentro Docker
+├── .env.example                         configurazione dell'ambiente
 ├── scripts/dev.mjs                      launcher dei due profili
 └── docs/DEVELOPMENT.md                  come far girare il progetto
 ```
