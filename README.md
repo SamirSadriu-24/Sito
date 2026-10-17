@@ -9,8 +9,8 @@ realizzato come tema WordPress autonomo.
 npm run dev
 ```
 
-WordPress parte su `http://127.0.0.1:9400` con database SQLite, senza installare
-nulla sul sistema. Serve solo **Node.js ≥ 20**.
+WordPress parte su `http://127.0.0.1:9400` con il tema OnTheWall già attivo e
+database SQLite, senza installare nulla sul sistema. Serve solo **Node.js ≥ 24.18**.
 
 Ti serve un MySQL vero? Con **Docker Desktop** avviato:
 

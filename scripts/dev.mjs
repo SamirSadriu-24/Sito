@@ -133,6 +133,8 @@ const commands = {
 			'--yes',
 			'@wp-playground/cli@latest',
 			'start',
+			// La root del repo non è un tema: puntando a OnTheWall/ Playground lo monta e lo attiva.
+			'--path', 'OnTheWall',
 			'--port', port,
 			'--php', php,
 			'--wp', wp,

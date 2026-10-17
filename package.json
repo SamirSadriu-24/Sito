@@ -5,7 +5,7 @@
   "description": "Sito WordPress di Rick Ferruzzi — tema OnTheWall e ambiente di sviluppo locale",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=24.18"
   },
   "scripts": {
     "dev": "node scripts/dev.mjs playground",
