@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $onthewall_img = get_template_directory_uri() . '/assets/img/';
 ?>
-<section id="about" class="relative z-10 mx-auto max-w-6xl px-5 pt-12 pb-20">
+<section id="about" class="relative mx-auto max-w-6xl px-5 pt-12 pb-20">
 	<div class="grid grid-cols-12 items-stretch gap-5">
 
 		<div class="col-span-12 lg:col-span-7 lg:pr-6">
@@ -37,22 +37,11 @@ $onthewall_img = get_template_directory_uri() . '/assets/img/';
 
 		</div>
 
-		<div class="relative col-span-12 min-h-[380px] lg:col-span-5">
-
-			<div class="halftone halftone-11 absolute inset-0 bg-secondary text-background/20 opacity-40" aria-hidden="true"></div>
-
-			<div class="torn absolute top-6 left-0 w-[78%] rotate-3 bg-accent p-2 ring-1 ring-black/10">
-				<img src="<?php echo esc_url( $onthewall_img . 'ig_05.jpg' ); ?>"
-					alt="<?php esc_attr_e( 'RED SIGNAL — red stencil portrait on black canvas by Rick Ferruzzi', 'onthewall' ); ?>"
-					width="482" height="640" class="aspect-[4/3] w-full object-cover" />
-			</div>
-
-			<div class="torn absolute right-0 bottom-0 w-[68%] -rotate-4 bg-chart-4 p-2 ring-1 ring-black/10">
-				<img src="<?php echo esc_url( $onthewall_img . 'ig_09.jpg' ); ?>"
-					alt="<?php esc_attr_e( 'OGNUNO VIBRA — chimpanzee wheatpaste over newspaper collage by Rick Ferruzzi', 'onthewall' ); ?>"
-					width="482" height="640" loading="lazy" class="aspect-[5/4] w-full object-cover" />
-			</div>
-
+		<?php // Logo al posto della colonna immagini (issue #5). Il multiply raggiunge lo sfondo solo perché la <section> non ha z-index: vedi docs/DECISIONI.md. ?>
+		<div class="col-span-12 grid place-items-center lg:col-span-5">
+			<img src="<?php echo esc_url( $onthewall_img . 'logo-misfit-toy.jpg' ); ?>"
+				alt="<?php esc_attr_e( 'Misfit Toy logo', 'onthewall' ); ?>"
+				width="1024" height="1024" class="mix-blend-multiply w-full max-w-md" />
 		</div>
 
 	</div>

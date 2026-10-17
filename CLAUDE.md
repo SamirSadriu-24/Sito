@@ -61,7 +61,8 @@ Servono nuove regole? Vanno in `assets/css/theme.css`, accodato dopo `main.css`.
 
 Tutto passa da `wp_enqueue_style()` / `wp_enqueue_script()` in `functions.php`.
 Gli attributi `style=""` della preview sono stati convertiti in classi dentro
-`theme.css` (`.halftone-14`, `.halftone-11`, `.spray-delay-*`).
+`theme.css` (`.halftone-14`, `.spray-delay-*`). Sul branch `4-6-about-testi-e-nastri`
+c'è anche `.mix-blend-multiply` per il logo (vedi `docs/DECISIONI.md`).
 
 ### Il tema non ha JavaScript
 

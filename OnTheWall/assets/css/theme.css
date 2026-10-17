@@ -10,17 +10,9 @@
 	background-size: 14px 14px;
 }
 
-.halftone-11 {
-	background-size: 11px 11px;
-}
-
 /* Ritardi in sequenza dell'animazione spray-in. */
 .spray-delay-120 {
 	animation-delay: 120ms;
-}
-
-.spray-delay-240 {
-	animation-delay: 240ms;
 }
 
 .spray-delay-360 {
@@ -29,4 +21,9 @@
 
 .spray-delay-520 {
 	animation-delay: 520ms;
+}
+
+/* Fonde il fondo bianco del logo (issue #5) con lo sfondo della pagina. */
+.mix-blend-multiply {
+	mix-blend-mode: multiply;
 }

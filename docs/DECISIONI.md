@@ -26,13 +26,13 @@ Tutte toccano `OnTheWall/template-parts/section-about.php`.
 |---|---|---|
 | #6 Rivisitazione testo | Testo in **un solo paragrafo**, come l'ha mandato il cliente | Sostituisce la divisione provvisoria in due paragrafi del 16/10. Il secondo `<p>` e la sua classe `spray-delay-440` sono stati eliminati: dopo il paragrafo (`spray-delay-360`) entra direttamente la CTA (`spray-delay-520`). |
 | #5 Logo | Logo **centrato al posto della colonna immagini** della sezione About | Sostituisce le due immagini e la trama halftone. Non va nell'header. |
+| #5 Logo | Usato l'allegato della issue (`assets/img/logo-misfit-toy.jpg`, JPEG 1024×1024 con fondo bianco), fuso con lo sfondo da `.mix-blend-multiply` in `theme.css` | Il multiply funziona solo perché la `<section id="about">` **non ha più `z-10`**: con lo z-index la sezione isolava la fusione e il fondo del logo restava un riquadro bianco. `relative` resta, perché tiene la sezione sopra la trama halftone fissa. Si vedono alcuni segni di scansione ai bordi del file. |
+| — | Eliminate da `theme.css` le classi rimaste senza uso: `.halftone-11` (colonna immagini), `.spray-delay-240` (riga rossa), `.spray-delay-440` (secondo paragrafo) | — |
 
 ### Da decidere
 
 - **Nuovo riferimento per la verifica di fedeltà.** Si sceglie tra una nuova preview approvata e la vecchia preview con l'elenco delle differenze qui sopra. Finché non si decide, il "121 elementi, 0 differenze" di `CLAUDE.md` vale solo per `main`.
-- **#5, file del logo.** Serve l'originale in SVG o PNG trasparente. L'immagine allegata alla issue ha il fondo bianco.
-
-La #5 non è ancora iniziata.
+- **#5, file definitivo del logo.** L'originale in SVG o PNG trasparente eliminerebbe i segni di scansione. Quando arriva: sostituire il file, togliere `mix-blend-multiply` dall'`<img>` e la regola da `theme.css`. A quel punto si può rimettere `z-10` sulla sezione.
 
 ## Stato della verifica sul branch `4-6-about-testi-e-nastri`
 
@@ -46,9 +46,11 @@ indice) ha dato lo stesso esito a 320 / 375 / 640 / 768 / 1024 / 1280 / 1440 px:
 - **0 differenze** orizzontali (x e larghezza);
 - cambiano solo le altezze dei blocchi con testo nuovo e la posizione verticale degli elementi che seguono.
 
-Questa verifica è stata fatta il 16/10, con il testo ancora diviso in due
-paragrafi. Dopo l'unione del 17/10 va ripetuta: il risultato atteso è
-**117 elementi** (un `<p>` in meno), con le stesse 0 differenze di stile.
+Questa verifica è stata fatta il 16/10, prima delle modifiche del 17/10
+(paragrafo unico e logo) e va ripetuta. Conteggio misurato il 17/10:
+**113 elementi**, cioè un `<p>` in meno e la colonna immagini (6 elementi)
+sostituita da contenitore + logo (2 elementi). Le differenze di stile attese
+riguardano solo la colonna del logo e lo z-index di `#about` (da 10 ad `auto`).
 
 ## Problema noto: `npm run dev` non carica il tema
 
