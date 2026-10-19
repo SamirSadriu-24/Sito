@@ -27,3 +27,23 @@
 .mix-blend-multiply {
 	mix-blend-mode: multiply;
 }
+
+/*
+ * Logo Misfit Toy: il JPEG ha ampi margini bianchi. L'immagine si ingrandisce
+ * e il riquadro taglia i margini, così l'ingranaggio riempie lo spazio.
+ */
+.logo-crop {
+	overflow: hidden;
+}
+
+.logo-crop img {
+	width: 130%;
+	max-width: none;
+	margin: -15%;
+}
+
+/* Hero: 1,35× il logo precedente, il massimo perché l'ingranaggio resti nella colonna. */
+.logo-crop--hero img {
+	width: 135%;
+	margin: 0 -17.5%;
+}
