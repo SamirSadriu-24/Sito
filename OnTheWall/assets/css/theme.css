@@ -87,3 +87,12 @@
 		margin: -15%;
 	}
 }
+
+/* Riga tecnica + prezzo delle card: stessa baseline; se non c'è spazio il prezzo va sotto, a destra. */
+.card-meta-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	column-gap: 0.5rem;
+}

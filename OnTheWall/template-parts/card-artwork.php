@@ -31,10 +31,20 @@ $onthewall_rotation = onthewall_card_rotation( $onthewall_index );
 		<?php endif; ?>
 	</div>
 
-	<?php if ( ! empty( $onthewall_artwork['technique'] ) ) : ?>
-		<p class="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-			<?php echo esc_html( $onthewall_artwork['technique'] ); ?>
-		</p>
+	<?php $onthewall_has_price = isset( $onthewall_artwork['price'] ) && '' !== (string) $onthewall_artwork['price']; ?>
+	<?php if ( ! empty( $onthewall_artwork['technique'] ) || $onthewall_has_price ) : ?>
+		<div class="card-meta-row">
+			<?php if ( ! empty( $onthewall_artwork['technique'] ) ) : ?>
+				<p class="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+					<?php echo esc_html( $onthewall_artwork['technique'] ); ?>
+				</p>
+			<?php endif; ?>
+			<?php if ( $onthewall_has_price ) : ?>
+				<span class="ml-auto font-mono text-[11px] font-bold tracking-[0.15em] whitespace-nowrap text-primary">
+					<?php echo esc_html( "€\u{00A0}" . number_format_i18n( (int) $onthewall_artwork['price'] ) ); ?>
+				</span>
+			<?php endif; ?>
+		</div>
 	<?php endif; ?>
 
 </article>

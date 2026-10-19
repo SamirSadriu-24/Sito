@@ -50,60 +50,70 @@ function onthewall_default_artworks() {
 			'title'     => 'SISTER STATIC',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_02.jpg',
 		),
 		array(
 			'title'     => 'GAZE NO.1',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_03.jpg',
 		),
 		array(
 			'title'     => 'SCREAM QUEEN',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_04.jpg',
 		),
 		array(
 			'title'     => 'FAST FOOD DAVID',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_05.jpg',
 		),
 		array(
 			'title'     => 'RED SIGNAL',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_06.jpg',
 		),
 		array(
 			'title'     => 'REBEL WITHOUT A PAUSE',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_07.jpg',
 		),
 		array(
 			'title'     => 'DANDY RIOT',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_08.jpg',
 		),
 		array(
 			'title'     => 'OGNUNO VIBRA',
 			'size'      => '60×90',
 			'technique' => 'wheatpaste · newspaper collage · spray',
+			'price'     => 200,
 			'image'     => 'ig_09.jpg',
 		),
 		array(
 			'title'     => 'TWO HEADS',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_10.jpg',
 		),
 		array(
 			'title'     => 'VERMILION SCENE',
 			'size'      => '80×80',
 			'technique' => 'spray · stencil · canvas',
+			'price'     => 200,
 			'image'     => 'ig_11.jpg',
 		),
 	);
@@ -115,7 +125,7 @@ function onthewall_default_artworks() {
  * Se esistono opere pubblicate nel CPT "artwork" vengono usate quelle,
  * altrimenti si ricade sul contenuto di default della preview.
  *
- * @return array[] Lista normalizzata: title, size, technique, image_html.
+ * @return array[] Lista normalizzata: title, size, technique, price, image_html.
  */
 function onthewall_get_artworks() {
 	$items = array();
@@ -148,6 +158,7 @@ function onthewall_get_artworks() {
 				'title'      => get_the_title( $post ),
 				'size'       => (string) get_post_meta( $post->ID, '_onthewall_size', true ),
 				'technique'  => (string) get_post_meta( $post->ID, '_onthewall_technique', true ),
+				'price'      => get_post_meta( $post->ID, '_onthewall_price', true ),
 				'image_html' => $image_html,
 			);
 		}

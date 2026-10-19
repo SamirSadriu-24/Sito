@@ -74,8 +74,36 @@ function onthewall_register_artwork_meta() {
 			)
 		);
 	}
+
+	// Prezzo in euro. Senza valore salvato vale il default (200); salvato vuoto, la card non lo mostra.
+	register_post_meta(
+		'artwork',
+		'_onthewall_price',
+		array(
+			'type'              => 'integer',
+			'description'       => esc_html__( 'Prezzo (€)', 'onthewall' ),
+			'single'            => true,
+			'default'           => 200,
+			'sanitize_callback' => 'onthewall_sanitize_price',
+			'auth_callback'     => function () {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
 }
 add_action( 'init', 'onthewall_register_artwork_meta' );
+
+/**
+ * Prezzo: stringa vuota (nessun prezzo) oppure intero in euro.
+ *
+ * @param mixed $value Valore inserito.
+ * @return int|string
+ */
+function onthewall_sanitize_price( $value ) {
+	$value = trim( (string) $value );
+
+	return '' === $value ? '' : absint( $value );
+}
 
 /**
  * Meta box per misura e tecnica.
@@ -102,6 +130,7 @@ function onthewall_render_artwork_meta_box( $post ) {
 
 	$size      = (string) get_post_meta( $post->ID, '_onthewall_size', true );
 	$technique = (string) get_post_meta( $post->ID, '_onthewall_technique', true );
+	$price     = (string) get_post_meta( $post->ID, '_onthewall_price', true );
 	?>
 	<p>
 		<label for="onthewall-size"><strong><?php esc_html_e( 'Misura', 'onthewall' ); ?></strong></label><br />
@@ -112,6 +141,12 @@ function onthewall_render_artwork_meta_box( $post ) {
 		<label for="onthewall-technique"><strong><?php esc_html_e( 'Tecnica', 'onthewall' ); ?></strong></label><br />
 		<input type="text" id="onthewall-technique" name="onthewall_technique" class="widefat"
 			value="<?php echo esc_attr( $technique ); ?>" placeholder="spray · stencil · canvas" />
+	</p>
+	<p>
+		<label for="onthewall-price"><strong><?php esc_html_e( 'Prezzo (€)', 'onthewall' ); ?></strong></label><br />
+		<input type="number" id="onthewall-price" name="onthewall_price" class="widefat" min="0" step="1"
+			value="<?php echo esc_attr( $price ); ?>" />
+		<span class="description"><?php esc_html_e( 'Lascia vuoto per non mostrare il prezzo.', 'onthewall' ); ?></span>
 	</p>
 	<?php
 }
@@ -149,5 +184,8 @@ function onthewall_save_artwork_meta( $post_id ) {
 		$value = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
 		update_post_meta( $post_id, $meta_key, $value );
 	}
+
+	$price = isset( $_POST['onthewall_price'] ) ? onthewall_sanitize_price( wp_unslash( $_POST['onthewall_price'] ) ) : '';
+	update_post_meta( $post_id, '_onthewall_price', $price );
 }
 add_action( 'save_post_artwork', 'onthewall_save_artwork_meta' );
