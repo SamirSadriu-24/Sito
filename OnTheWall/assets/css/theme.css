@@ -47,3 +47,43 @@
 	width: 135%;
 	margin: 0 -17.5%;
 }
+
+/*
+ * Hero sui telefoni (sotto md, 48rem): logo a destra del titolo.
+ * La colonna del testo diventa "contents", così titolo, paragrafo e CTA entrano
+ * nella griglia: riga 1 titolo + logo, poi paragrafo e CTA a larghezza piena.
+ * La seconda colonna è 1fr, così il paragrafo che la attraversa non allarga quella del titolo.
+ */
+@media (width < 48rem) {
+	#about > .grid {
+		grid-template-columns: max-content minmax(0, 1fr);
+		align-items: center;
+		row-gap: 0;
+	}
+
+	#about > .grid > :first-child {
+		display: contents;
+	}
+
+	#about > .grid > :first-child > :not(h1) {
+		grid-column: 1 / -1;
+	}
+
+	/* Stesso margine superiore dell'h1 (mt-6): i due centri coincidono. */
+	#about > .grid > :last-child {
+		grid-row: 1;
+		grid-column: 2;
+		margin-top: 1.5rem;
+	}
+
+	/* Circa il 42% del contenitore, ridotto se lo spazio a destra del titolo non basta. */
+	.logo-crop--hero {
+		width: min(100%, (100vw - 2.5rem) * 0.42);
+	}
+
+	/* Riquadro quadrato: in riga col titolo i margini bianchi sopra e sotto non servono. */
+	.logo-crop--hero img {
+		width: 130%;
+		margin: -15%;
+	}
+}
