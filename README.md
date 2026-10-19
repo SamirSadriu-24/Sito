@@ -42,10 +42,9 @@ Il tema riproduce la preview approvata in modo identico (verificato: 121 element
 0 differenze, dai 320 ai 1440 px). Prima di toccare layout, colori, tipografia o
 animazioni, leggi [`CLAUDE.md`](CLAUDE.md).
 
-Le modifiche chieste dal cliente dopo l'approvazione (sezione About, issue #4–#6)
-e le decisioni ancora aperte sono in [`docs/DECISIONI.md`](docs/DECISIONI.md).
-Lì trovi anche come avviare Playground con il tema, perché oggi `npm run dev`
-non lo carica.
+Le modifiche chieste dal cliente dopo l'approvazione (sezione About, issue #4–#6,
+poi logo, Commissions e prezzi delle opere) e le decisioni ancora aperte sono in
+[`docs/DECISIONI.md`](docs/DECISIONI.md).
 
 ## Distribuzione
 
