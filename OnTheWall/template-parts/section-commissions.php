@@ -24,7 +24,7 @@ $onthewall_email = onthewall_email();
 				<span class="text-primary"><?php esc_html_e( 'Got an idea?', 'onthewall' ); ?></span>
 			</h2>
 			<p class="mt-5 max-w-[46ch] text-pretty text-background/70">
-				<?php esc_html_e( 'Original works, murals and series — tell me the size and the tone. No brief too weird, no idea too loud. For more details and commissions, drop me a line.', 'onthewall' ); ?>
+				<?php esc_html_e( '(Unless, of course, you’re a Nazi, capitalist, cop, military grunt, CEO, dude-bro, racist, homophobe, transphobe, vivisector, socialist, Marxist, patriarch, religious authority or otherwise authoritarian jerk… In the event you are one of these, please address your comments and concerns to the barrel of a gun pointed at your own vacant head. Cheers!)', 'onthewall' ); ?>
 			</p>
 		</div>
 
@@ -32,6 +32,10 @@ $onthewall_email = onthewall_email();
 			<a href="<?php echo esc_url( 'mailto:' . $onthewall_email ); ?>"
 				class="inline-block -rotate-1 bg-primary px-6 py-4 font-display text-2xl break-all text-primary-foreground ring-1 ring-black/20 transition-all hover:rotate-0 hover:bg-accent hover:text-accent-foreground sm:text-3xl">
 				<?php echo esc_html( $onthewall_email ); ?>
+			</a>
+			<a href="<?php echo esc_url( 'https://www.instagram.com/misfit_toy_art/' ); ?>" target="_blank" rel="noopener noreferrer"
+				class="mt-5 inline-block -rotate-1 bg-primary px-6 py-4 font-display text-2xl break-all text-primary-foreground ring-1 ring-black/20 transition-all hover:rotate-0 hover:bg-accent hover:text-accent-foreground sm:text-3xl">
+				@misfit_toy_art
 			</a>
 			<div class="mt-6 flex flex-wrap gap-3 font-mono text-[11px] uppercase tracking-[0.2em] text-background/50">
 				<span><?php esc_html_e( 'originals & commissions', 'onthewall' ); ?></span>

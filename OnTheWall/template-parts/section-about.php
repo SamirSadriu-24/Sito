@@ -39,9 +39,11 @@ $onthewall_img = get_template_directory_uri() . '/assets/img/';
 
 		<?php // Logo al posto della colonna immagini (issue #5). Il multiply raggiunge lo sfondo solo perché la <section> non ha z-index: vedi docs/DECISIONI.md. ?>
 		<div class="col-span-12 grid place-items-center lg:col-span-5">
-			<img src="<?php echo esc_url( $onthewall_img . 'logo-misfit-toy.jpg' ); ?>"
-				alt="<?php esc_attr_e( 'Misfit Toy logo', 'onthewall' ); ?>"
-				width="1024" height="1024" class="mix-blend-multiply w-full max-w-md" />
+			<div class="logo-crop logo-crop--hero w-full max-w-md">
+				<img src="<?php echo esc_url( $onthewall_img . 'logo-misfit-toy-corretto.jpg' ); ?>"
+					alt="<?php esc_attr_e( 'Misfit Toy logo', 'onthewall' ); ?>"
+					width="1024" height="1024" class="mix-blend-multiply" />
+			</div>
 		</div>
 
 	</div>

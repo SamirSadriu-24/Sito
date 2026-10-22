@@ -63,8 +63,10 @@ Servono nuove regole? Vanno in `assets/css/theme.css`, accodato dopo `main.css`.
 
 Tutto passa da `wp_enqueue_style()` / `wp_enqueue_script()` in `functions.php`.
 Gli attributi `style=""` della preview sono stati convertiti in classi dentro
-`theme.css` (`.halftone-14`, `.spray-delay-*`). Sul branch `4-6-about-testi-e-nastri`
-c'è anche `.mix-blend-multiply` per il logo (vedi `docs/DECISIONI.md`).
+`theme.css` (`.halftone-14`, `.spray-delay-*`). Per le modifiche del cliente ci sono
+anche `.mix-blend-multiply` e `.logo-crop` per il logo, `.card-meta-row` per tecnica e
+prezzo delle card e la regola mobile di `#about` (logo accanto al titolo sotto 48rem):
+vedi `docs/DECISIONI.md`.
 
 ### Il tema non ha JavaScript
 
@@ -85,7 +87,8 @@ Esempio: le rotazioni delle card ciclano su `-rotate-1`, `rotate-1`, `-rotate-2`
 ### Custom post type `artwork` ("Opere")
 
 Gestisce la griglia "The Wall". Campi: titolo, immagine in evidenza, e i meta
-`_onthewall_size` (es. `80×80`) e `_onthewall_technique` (es. `spray · stencil · canvas`).
+`_onthewall_size` (es. `80×80`), `_onthewall_technique` (es. `spray · stencil · canvas`)
+e `_onthewall_price` (intero in euro, default 200; salvato vuoto la card non mostra il prezzo).
 Ordinamento via `menu_order`.
 
 È registrato con `public => false` e `publicly_queryable => false`: **niente pagine
@@ -143,12 +146,11 @@ Due avvertenze imparate sul campo:
 ## Stato attuale e punti aperti
 
 - Il tema è completo e verificato identico alla preview.
-- Il cliente ha chiesto modifiche alla sezione About (issue #4, #5, #6). Le
-  modifiche approvate, quelle ancora da decidere e l'esito delle verifiche sono
-  in `docs/DECISIONI.md`. Sul branch `4-6-about-testi-e-nastri` il risultato
-  atteso non è più "121 elementi, 0 differenze": vale quanto scritto lì.
-- `npm run dev` non monta il tema (Playground parte dalla root del repo). Il
-  comando alternativo è in `docs/DECISIONI.md`.
+- Il cliente ha chiesto modifiche alla sezione About (issue #4, #5, #6) e poi a
+  logo, Commissions e card delle opere (prezzo). Le modifiche approvate, quelle
+  ancora da decidere e l'esito delle verifiche sono in `docs/DECISIONI.md`. Con
+  queste modifiche il risultato atteso non è più "121 elementi, 0 differenze":
+  vale quanto scritto lì.
 - `screenshot.png` non è incluso: andrebbe aggiunto (1200×900) per l'anteprima
   nella schermata Temi di WordPress.
 - La cartella `On-The-Wall/src/App.jsx` alla root è un residuo del vecchio

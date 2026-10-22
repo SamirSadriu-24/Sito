@@ -1,15 +1,17 @@
 # Decisioni di progetto
 
 Registro delle scelte che modificano il design approvato o che restano in
-sospeso. Leggilo prima di toccare la sezione About o la procedura di verifica.
+sospeso. Leggilo prima di toccare About, header, card delle opere, Commissions
+o la procedura di verifica.
 
 ## Modifiche richieste dal cliente (ottobre 2026)
 
-Le issue #4, #5 e #6 sono richieste del cliente che cambiano la preview
-approvata. Sono **eccezioni volute** alla regola del design congelato
-(vedi `CLAUDE.md`): non vanno "corrette" per riallinearsi alla preview.
+Le issue #4, #5 e #6 e le richieste del 17–19/10 sono richieste del cliente che
+cambiano la preview approvata. Sono **eccezioni volute** alla regola del design
+congelato (vedi `CLAUDE.md`): non vanno "corrette" per riallinearsi alla preview.
 
-Tutte toccano `OnTheWall/template-parts/section-about.php`.
+Le issue #4–#6 toccano `OnTheWall/template-parts/section-about.php`; le
+richieste del 17–19/10 anche header, card delle opere e Commissions.
 
 ### Decise il 16/10/2026
 
@@ -25,19 +27,29 @@ Tutte toccano `OnTheWall/template-parts/section-about.php`.
 | Issue | Decisione | Note per chi viene dopo |
 |---|---|---|
 | #6 Rivisitazione testo | Testo in **un solo paragrafo**, come l'ha mandato il cliente | Sostituisce la divisione provvisoria in due paragrafi del 16/10. Il secondo `<p>` e la sua classe `spray-delay-440` sono stati eliminati: dopo il paragrafo (`spray-delay-360`) entra direttamente la CTA (`spray-delay-520`). |
-| #5 Logo | Logo **centrato al posto della colonna immagini** della sezione About | Sostituisce le due immagini e la trama halftone. Non va nell'header. |
-| #5 Logo | Usato l'allegato della issue (`assets/img/logo-misfit-toy.jpg`, JPEG 1024×1024 con fondo bianco), fuso con lo sfondo da `.mix-blend-multiply` in `theme.css` | Il multiply funziona solo perché la `<section id="about">` **non ha più `z-10`**: con lo z-index la sezione isolava la fusione e il fondo del logo restava un riquadro bianco. `relative` resta, perché tiene la sezione sopra la trama halftone fissa. Si vedono alcuni segni di scansione ai bordi del file. |
+| #5 Logo | Logo **centrato al posto della colonna immagini** della sezione About | Sostituisce le due immagini e la trama halftone. Dal 19/10 è anche nell'header (vedi sotto). |
+| #5 Logo | Usato l'allegato della issue (`assets/img/logo-misfit-toy.jpg`, JPEG 1024×1024 con fondo bianco), fuso con lo sfondo da `.mix-blend-multiply` in `theme.css` | Il multiply funziona solo perché la `<section id="about">` **non ha più `z-10`**: con lo z-index la sezione isolava la fusione e il fondo del logo restava un riquadro bianco. `relative` resta, perché tiene la sezione sopra la trama halftone fissa. Si vedono alcuni segni di scansione ai bordi del file. Dal 19/10 il tema usa il file corretto (vedi sotto); `logo-misfit-toy.jpg` resta in `assets/img/` ma nessun template lo usa più. |
 | — | Eliminate da `theme.css` le classi rimaste senza uso: `.halftone-11` (colonna immagini), `.spray-delay-240` (riga rossa), `.spray-delay-440` (secondo paragrafo) | — |
+
+### Decise il 17–19/10/2026 (branch `footer-logo-prezzi`)
+
+| Area | Decisione | Note per chi viene dopo |
+|---|---|---|
+| Commissions | Il paragrafo "Original works, murals and series…" diventa il disclaimer del cliente "(Unless, of course, you’re a Nazi…)"; sotto il bottone dell'email c'è un secondo bottone, con lo stesso stile, `@misfit_toy_art` verso `https://www.instagram.com/misfit_toy_art/` | Il bottone apre una nuova scheda (`noopener noreferrer`). L'URL è scritto in `section-commissions.php`, non centralizzato come l'email. |
+| Logo | Nuovo file `assets/img/logo-misfit-toy-corretto.jpg`, senza le linee nere ai bordi del vecchio, nell'hero e nell'header al posto della "R" rossa | `.logo-crop` in `theme.css` ingrandisce il JPEG e ne taglia i margini bianchi: nell'hero l'ingranaggio è 1,35× quello di prima (`.logo-crop--hero`, il massimo dentro la colonna), nell'header riempie il riquadro di 36 px della R. L'`<header>` non ha più `z-10`, per lo stesso motivo di `#about`: isolava il multiply e il fondo del logo restava bianco. Il nome "RICK FERRUZZI" accanto al logo resta. |
+| About mobile | Sotto `md` (48rem) il logo sta a destra del titolo | La colonna del testo diventa `display: contents` (regola `@media (width < 48rem)` su `#about` in `theme.css`): titolo e logo nella prima riga della griglia, paragrafo e CTA a larghezza piena. Il logo è circa il 42% del contenitore e si riduce se non c'è spazio (81 px a 320 px). Tablet e desktop invariati: 0 pixel diversi a 768, 820 e 1440 px. |
+| The Wall | Prezzo per opera, meta `_onthewall_price` (intero in euro, default registrato 200) | Campo "Prezzo (€)" nel box dell'opera. Senza valore salvato vale 200; salvato vuoto, la card non mostra il prezzo. Le 10 opere di riserva hanno `price => 200`. Nella card (`.card-meta-row`) il prezzo è in basso a destra, rosso e in grassetto, sulla baseline della tecnica; con una tecnica lunga va a capo, sotto a destra: accettato dall'utente. |
 
 ### Da decidere
 
-- **Nuovo riferimento per la verifica di fedeltà.** Si sceglie tra una nuova preview approvata e la vecchia preview con l'elenco delle differenze qui sopra. Finché non si decide, il "121 elementi, 0 differenze" di `CLAUDE.md` vale solo per `main`.
-- **#5, file definitivo del logo.** L'originale in SVG o PNG trasparente eliminerebbe i segni di scansione. Quando arriva: sostituire il file, togliere `mix-blend-multiply` dall'`<img>` e la regola da `theme.css`. A quel punto si può rimettere `z-10` sulla sezione.
+- **Nuovo riferimento per la verifica di fedeltà.** Si sceglie tra una nuova preview approvata e la vecchia preview con l'elenco delle differenze qui sopra. Finché non si decide, il "121 elementi, 0 differenze" di `CLAUDE.md` vale solo per il tema prima delle modifiche del cliente (`05dc932`).
+- **#5, file definitivo del logo.** Ora c'è un JPEG corretto (`logo-misfit-toy-corretto.jpg`, senza le linee nere ai bordi), ma ha ancora il fondo bianco: l'originale in SVG o PNG trasparente non è ancora arrivato. Quando arriva: sostituire il file nell'hero e nell'header, togliere `mix-blend-multiply` dalle due `<img>` e la regola da `theme.css`, e rivedere `.logo-crop`, tarato sui margini bianchi del JPEG. A quel punto si può rimettere `z-10` su `#about` e sull'header.
 
 ## Stato della verifica sul branch `4-6-about-testi-e-nastri`
 
 Verifica del 17/10, sul commit `7585d2d`. Sostituisce quella del 16/10, fatta
-prima del paragrafo unico e del logo.
+prima del paragrafo unico e del logo. È precedente alle modifiche del
+17–19/10 (branch `footer-logo-prezzi`).
 
 **Come è stata fatta.** Due Playground affiancati: il tema di `main` (`05dc932`)
 su `:9401` e il branch su `:9400`. A ogni larghezza le due pagine sono misurate
@@ -60,19 +72,3 @@ La scrollbar coincide tra le due pagine a ogni larghezza.
 **Logo.** Sotto i 1024 px va sotto il testo: 280 px a 320, 335 px a 375, 448 px
 (il massimo) a 640 e 768. Da 1024 px in su sta accanto al testo, centrato in
 verticale nella colonna: 392 px a 1024, 448 px a 1280 e 1440.
-
-## Problema noto: `npm run dev` non carica il tema
-
-`scripts/dev.mjs` avvia Playground dalla root del repo. La root non è un tema,
-quindi Playground non monta né attiva `OnTheWall/` e mostra solo i temi
-twentytwenty*. Gli altri documenti dicono il contrario.
-
-Finché `dev.mjs` non viene corretto, per lavorare sul tema usa:
-
-```bash
-npx --yes @wp-playground/cli@latest start --path=OnTheWall --port 9400 --php 8.3 --wp latest
-```
-
-Con `--path=OnTheWall` Playground riconosce il tema, lo monta e lo attiva.
-La versione attuale della CLI (3.1.58) dichiara Node ≥ 24.18: con Node 22
-funziona, ma `npm` stampa degli avvisi `EBADENGINE`.
