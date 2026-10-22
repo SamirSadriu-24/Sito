@@ -8,10 +8,12 @@
 	display: none !important;
 }
 
+/* Larga abbastanza per immagine principale + riquadro della galleria. */
 .onthewall-wall-table .onthewall-col-image {
-	width: 90px;
+	width: 170px;
 }
 
+.onthewall-wall-table .onthewall-col-price,
 .onthewall-wall-table .onthewall-col-order {
 	width: 80px;
 }
@@ -32,6 +34,67 @@
 	background: #f0f0f1;
 	border: 1px solid #dcdcde;
 	border-radius: 2px;
+}
+
+/* Galleria: miniature in riga, ognuna con la sua × per toglierla. */
+.onthewall-gallery-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 8px 0 6px;
+}
+
+.onthewall-gallery-list li {
+	position: relative;
+	margin: 0;
+	cursor: move;
+}
+
+/* Riquadri su cui trascinare le foto dal computer (immagine principale e galleria). */
+.onthewall-drop {
+	margin-top: 8px;
+	padding: 6px 8px 8px;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+}
+
+.onthewall-drop.is-dragover {
+	border-color: #2271b1;
+	background: #f0f6fc;
+}
+
+.onthewall-drop.is-uploading {
+	opacity: 0.7;
+}
+
+.onthewall-drop-hint {
+	margin: 6px 0 0 !important;
+}
+
+.onthewall-gallery-list .onthewall-wall-thumb {
+	width: 40px;
+	height: 40px;
+}
+
+.onthewall-gallery-remove {
+	position: absolute;
+	top: -6px;
+	right: -6px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff !important;
+	box-shadow: 0 0 0 1px #dcdcde;
+	color: #b32d2e !important;
+	line-height: 16px;
+	text-align: center;
+	text-decoration: none;
+}
+
+.onthewall-sold {
+	display: block;
+	margin-top: 4px;
+	white-space: nowrap;
 }
 
 .onthewall-media-actions {

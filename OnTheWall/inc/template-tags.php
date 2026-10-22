@@ -120,12 +120,33 @@ function onthewall_default_artworks() {
 }
 
 /**
+ * Etichetta di prezzo di un'opera: "SOLD", "€ 1.250" oppure stringa vuota.
+ *
+ * Usata sia dalla card sia dalla finestra dell'opera.
+ *
+ * @param array $artwork Opera normalizzata da onthewall_get_artworks().
+ * @return string Testo non ancora escapato.
+ */
+function onthewall_artwork_price_label( $artwork ) {
+	if ( ! empty( $artwork['sold'] ) ) {
+		return __( 'SOLD', 'onthewall' );
+	}
+
+	if ( ! isset( $artwork['price'] ) || '' === (string) $artwork['price'] ) {
+		return '';
+	}
+
+	return "€\u{00A0}" . number_format_i18n( (int) $artwork['price'] );
+}
+
+/**
  * Restituisce le opere da mostrare nella sezione "The Wall".
  *
  * Se esistono opere pubblicate nel CPT "artwork" vengono usate quelle,
  * altrimenti si ricade sul contenuto di default della preview.
  *
- * @return array[] Lista normalizzata: title, size, technique, price, image_html.
+ * @return array[] Lista normalizzata: title, size, technique, price, sold (solo CPT), image_html,
+ *                 photos (HTML delle foto per la finestra dell'opera, la prima è quella della card).
  */
 function onthewall_get_artworks() {
 	$items = array();
@@ -154,11 +175,30 @@ function onthewall_get_artworks() {
 				)
 			);
 
+			$title     = get_the_title( $post );
+			$photo_ids = array_unique( array_filter( array_merge( array( (int) get_post_thumbnail_id( $post ) ), onthewall_get_gallery_ids( $post->ID ) ) ) );
+			$photos    = array();
+
+			foreach ( $photo_ids as $photo_id ) {
+				$photos[] = wp_get_attachment_image(
+					$photo_id,
+					'large',
+					false,
+					array(
+						'class'   => 'lightbox-img',
+						'loading' => 'lazy',
+						'alt'     => $title,
+					)
+				);
+			}
+
 			$items[] = array(
-				'title'      => get_the_title( $post ),
+				'photos'     => array_filter( $photos ),
+				'title'      => $title,
 				'size'       => (string) get_post_meta( $post->ID, '_onthewall_size', true ),
 				'technique'  => (string) get_post_meta( $post->ID, '_onthewall_technique', true ),
 				'price'      => get_post_meta( $post->ID, '_onthewall_price', true ),
+				'sold'       => (bool) get_post_meta( $post->ID, '_onthewall_sold', true ),
 				'image_html' => $image_html,
 			);
 		}
@@ -173,6 +213,14 @@ function onthewall_get_artworks() {
 			'<img src="%1$s" alt="%2$s" width="640" height="640" loading="lazy" class="aspect-square w-full object-cover" />',
 			esc_url( $src ),
 			esc_attr( $artwork['title'] . ' — ' . $artwork['technique'] )
+		);
+
+		$artwork['photos'] = array(
+			sprintf(
+				'<img src="%1$s" alt="%2$s" width="640" height="640" loading="lazy" class="lightbox-img" />',
+				esc_url( $src ),
+				esc_attr( $artwork['title'] )
+			),
 		);
 
 		$items[] = $artwork;
