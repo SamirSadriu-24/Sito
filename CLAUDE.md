@@ -24,8 +24,9 @@ Sito/                                    ← root del repo git
 │   ├── index.php header.php footer.php
 │   ├── template-parts/                  header-site, section-about, section-works,
 │   │                                    card-artwork, section-commissions
-│   ├── inc/                             template-tags, post-types, nav walker
-│   └── assets/css/  assets/img/
+│   ├── inc/                             template-tags, post-types, nav walker,
+│   │                                    admin-artwork-manager (Gestisci The Wall), login-protection
+│   └── assets/css/  assets/img/  assets/js/ (solo bacheca)
 ├── Rick Ferruzzi — …_files/             asset originali della preview
 ├── docker-compose.yml                   WordPress + database esterno (DB_MODE)
 ├── docker-compose.local-db.yml          override: database dentro Docker
@@ -71,7 +72,11 @@ vedi `docs/DECISIONI.md`.
 ### Il tema non ha JavaScript
 
 La preview non ha comportamenti JS: tutte le animazioni sono CSS. Non aggiungere
-script salvo richiesta esplicita.
+script salvo richiesta esplicita. Anche la finestra dell'opera funziona senza JS (vedi sotto).
+
+L'unico script è `assets/js/admin-artwork-manager.js`, caricato **solo in wp-admin**
+(Gestisci The Wall e modifica dell'opera): Media Library, trascinamento delle foto,
+riordino della galleria, blocco del prezzo per le opere vendute.
 
 ### Classi di utilità
 
@@ -88,8 +93,15 @@ Esempio: le rotazioni delle card ciclano su `-rotate-1`, `rotate-1`, `-rotate-2`
 
 Gestisce la griglia "The Wall". Campi: titolo, immagine in evidenza, e i meta
 `_onthewall_size` (es. `80×80`), `_onthewall_technique` (es. `spray · stencil · canvas`)
-e `_onthewall_price` (intero in euro, default 200; salvato vuoto la card non mostra il prezzo).
-Ordinamento via `menu_order`.
+e `_onthewall_price` (intero in euro, default 200; salvato vuoto la card non mostra il prezzo)
+e `_onthewall_sold` (booleano: la card mostra SOLD al posto del prezzo, che resta salvato e in bacheca
+diventa di sola lettura) e `_onthewall_gallery` (ID delle foto aggiuntive separati da virgola,
+dopo l'immagine in evidenza). Ordinamento via `menu_order`.
+
+Clic sulla foto di una card → finestra dell'opera (`card-artwork.php`): foto grandi che scorrono e
+dettagli. È un **popover HTML nativo** con scroll-snap CSS e frecce come link alle ancore delle foto,
+quindi il front-end resta senza JavaScript. Non mettere `scroll-behavior: smooth` sul contenitore delle
+foto: dentro il popover impedisce alle frecce di funzionare.
 
 È registrato con `public => false` e `publicly_queryable => false`: **niente pagine
 singole**, il sito resta one-page come la preview.
@@ -147,7 +159,8 @@ Due avvertenze imparate sul campo:
 
 - Il tema è completo e verificato identico alla preview.
 - Il cliente ha chiesto modifiche alla sezione About (issue #4, #5, #6) e poi a
-  logo, Commissions e card delle opere (prezzo). Le modifiche approvate, quelle
+  logo, Commissions e card delle opere (prezzo), infine opere vendute, galleria con
+  finestra dell'opera e caricamento a trascinamento in bacheca. Le modifiche approvate, quelle
   ancora da decidere e l'esito delle verifiche sono in `docs/DECISIONI.md`. Con
   queste modifiche il risultato atteso non è più "121 elementi, 0 differenze":
   vale quanto scritto lì.
