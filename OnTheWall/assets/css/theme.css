@@ -105,7 +105,68 @@
 	display: block;
 	width: 100%;
 	padding: 0;
+	/* Ancora la striscia SOLD e la taglia al bordo della foto. */
+	position: relative;
+	overflow: hidden;
 	cursor: zoom-in;
+}
+
+/*
+ * Opere vendute: striscia wheatpaste incollata di traverso sull'opera.
+ * Riprende due stilemi già usati nel sito, il bordo strappato di .torn e la
+ * trama a puntini di .halftone.
+ *
+ * Due livelli: il contenitore è la tela scolorita, visibile appena, che fa da
+ * traccia; dentro, .sold-tape-roll è la tela piena che si srotola da sinistra
+ * passando sulla card. Servono separati perché un'opacity sul contenitore
+ * limiterebbe anche il figlio.
+ * Su touch resta allo stato di riposo, ma l'etichetta di prezzo scrive "SOLD".
+ */
+.sold-tape {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	/* Più larga della foto: la striscia la attraversa ed esce dai bordi. */
+	width: 150%;
+	/* Tela ancora arrotolata: stesso rosso del tema, molto diluito. */
+	background-color: color-mix(in oklab, var(--primary) 38%, transparent);
+	background-image: radial-gradient(rgb(0 0 0 / 0.14) 1.5px, transparent 1.5px);
+	background-size: 7px 7px;
+	/* Carta strappata sopra e sotto. */
+	clip-path: polygon(
+		0 14%, 9% 4%, 19% 13%, 31% 2%, 44% 12%, 57% 3%, 69% 13%, 81% 4%, 92% 12%, 100% 5%,
+		100% 87%, 90% 97%, 78% 88%, 66% 98%, 53% 89%, 40% 99%, 28% 88%, 16% 97%, 6% 90%, 0 96%
+	);
+	transform: translate(-50%, -50%) rotate(-8deg);
+	pointer-events: none;
+}
+
+.sold-tape-roll {
+	display: block;
+	padding: 0.45em 0;
+	text-align: center;
+	background-color: var(--primary);
+	/* Retino di stampa, come la trama halftone del resto del sito. */
+	background-image: radial-gradient(rgb(0 0 0 / 0.22) 1.5px, transparent 1.5px);
+	background-size: 7px 7px;
+	color: var(--primary-foreground);
+	font-size: clamp(1.1rem, 3.2vw, 2rem);
+	letter-spacing: 0.28em;
+	/* Compensa lo spazio che il tracking aggiunge dopo l'ultima lettera. */
+	text-indent: 0.28em;
+	/* Arrotolata a sinistra: inset() si anima ovunque, a differenza di mask-size. */
+	clip-path: inset(0 100% 0 0);
+	/*
+	 * Curva più regolare della solita del sito: il rotolo parte, prende
+	 * velocità e si ferma. Con la cubic-bezier(.32,.72,0,1) l'80% della corsa
+	 * si consumava nei primi 150ms e sembrava uno scatto, non uno srotolamento.
+	 */
+	transition: clip-path 0.55s cubic-bezier(0.45, 0.05, 0.2, 1);
+}
+
+.tilt-hover:hover .sold-tape-roll,
+.tilt-hover:focus-within .sold-tape-roll {
+	clip-path: inset(0 0 0 0);
 }
 
 .lightbox-trigger:focus-visible,
