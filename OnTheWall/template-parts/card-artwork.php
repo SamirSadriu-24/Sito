@@ -29,6 +29,12 @@ $onthewall_box_id      = 'opera-' . ( $onthewall_index + 1 );
 
 	<button type="button" class="lightbox-trigger" popovertarget="<?php echo esc_attr( $onthewall_box_id ); ?>">
 		<?php echo wp_kses_post( $onthewall_artwork['image_html'] ); ?>
+		<?php // aria-hidden: "SOLD" è già annunciato dall'etichetta di prezzo qui sotto. ?>
+		<?php if ( ! empty( $onthewall_artwork['sold'] ) ) : ?>
+			<span class="sold-tape" aria-hidden="true">
+				<span class="sold-tape-roll font-display"><?php esc_html_e( 'SOLD', 'onthewall' ); ?></span>
+			</span>
+		<?php endif; ?>
 	</button>
 
 	<div class="mt-3 flex items-start justify-between gap-2">
