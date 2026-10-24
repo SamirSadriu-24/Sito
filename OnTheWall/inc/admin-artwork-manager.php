@@ -61,7 +61,12 @@ add_action( 'admin_menu', 'onthewall_add_artwork_manager_page' );
  * @param string $suffix Hook suffix della schermata corrente.
  */
 function onthewall_artwork_manager_assets( $suffix ) {
-	if ( $suffix !== onthewall_artwork_manager_hook() ) {
+	$screen = get_current_screen();
+
+	// Anche nella modifica singola, per lo switch "Venduta" della meta box.
+	$is_artwork_edit = $screen && 'post' === $screen->base && 'artwork' === $screen->post_type;
+
+	if ( $suffix !== onthewall_artwork_manager_hook() && ! $is_artwork_edit ) {
 		return;
 	}
 
@@ -79,7 +84,7 @@ function onthewall_artwork_manager_assets( $suffix ) {
 	wp_enqueue_script(
 		'onthewall-admin-artwork-manager',
 		$theme_uri . '/assets/js/admin-artwork-manager.js',
-		array( 'jquery' ),
+		array( 'jquery', 'jquery-ui-sortable', 'wp-api-fetch' ),
 		onthewall_asset_version( '/assets/js/admin-artwork-manager.js' ),
 		true
 	);
@@ -88,8 +93,13 @@ function onthewall_artwork_manager_assets( $suffix ) {
 		'onthewall-admin-artwork-manager',
 		'onthewallArtworkManager',
 		array(
-			'frameTitle'  => esc_html__( 'Scegli l\'immagine dell\'opera', 'onthewall' ),
-			'frameButton' => esc_html__( 'Usa questa immagine', 'onthewall' ),
+			'frameTitle'    => esc_html__( 'Scegli l\'immagine dell\'opera', 'onthewall' ),
+			'frameButton'   => esc_html__( 'Usa questa immagine', 'onthewall' ),
+			'galleryTitle'  =>esc_html__( 'Aggiungi foto all\'opera', 'onthewall' ),
+			'galleryButton' => esc_html__( 'Aggiungi le foto selezionate', 'onthewall' ),
+			'galleryRemove' => esc_html__( 'Rimuovi foto', 'onthewall' ),
+			'uploading'     => esc_html__( 'Caricamento…', 'onthewall' ),
+			'uploadError'   => esc_html__( 'Caricamento non riuscito:', 'onthewall' ),
 		)
 	);
 }
@@ -147,6 +157,18 @@ function onthewall_handle_artwork_manager_save() {
 		update_post_meta( $id, '_onthewall_size', isset( $data['size'] ) ? sanitize_text_field( $data['size'] ) : '' );
 		update_post_meta( $id, '_onthewall_technique', isset( $data['technique'] ) ? sanitize_text_field( $data['technique'] ) : '' );
 
+		// Vuoto = nessun prezzo in card; campo assente = prezzo invariato.
+		if ( isset( $data['price'] ) ) {
+			update_post_meta( $id, '_onthewall_price', onthewall_sanitize_price( $data['price'] ) );
+		}
+
+		// Checkbox non spuntata = non inviata = non venduta (la riga la stampa sempre).
+		update_post_meta( $id, '_onthewall_sold', ! empty( $data['sold'] ) );
+
+		if ( isset( $data['gallery'] ) ) {
+			update_post_meta( $id, '_onthewall_gallery', onthewall_sanitize_gallery( $data['gallery'] ) );
+		}
+
 		$thumb = isset( $data['thumbnail_id'] ) ? absint( $data['thumbnail_id'] ) : 0;
 
 		if ( $thumb ) {
@@ -179,6 +201,16 @@ function onthewall_handle_artwork_manager_save() {
 		if ( $new_id && ! is_wp_error( $new_id ) ) {
 			update_post_meta( $new_id, '_onthewall_size', isset( $new['size'] ) ? sanitize_text_field( $new['size'] ) : '' );
 			update_post_meta( $new_id, '_onthewall_technique', isset( $new['technique'] ) ? sanitize_text_field( $new['technique'] ) : '' );
+
+			if ( isset( $new['price'] ) ) {
+				update_post_meta( $new_id, '_onthewall_price', onthewall_sanitize_price( $new['price'] ) );
+			}
+
+			update_post_meta( $new_id, '_onthewall_sold', ! empty( $new['sold'] ) );
+
+			if ( isset( $new['gallery'] ) ) {
+				update_post_meta( $new_id, '_onthewall_gallery', onthewall_sanitize_gallery( $new['gallery'] ) );
+			}
 
 			if ( $new_thumb ) {
 				set_post_thumbnail( $new_id, $new_thumb );
@@ -254,6 +286,7 @@ function onthewall_render_media_control( $base, $name, $thumb_id ) {
 	$preview_class  = 'onthewall-wall-thumb' . ( $url ? '' : ' hidden' );
 	$remove_class   = 'button-link onthewall-media-remove' . ( $url ? '' : ' hidden' );
 	?>
+	<div class="onthewall-drop onthewall-media-drop" data-target="<?php echo esc_attr( $base ); ?>">
 	<img id="<?php echo esc_attr( $base ); ?>_preview" class="<?php echo esc_attr( $preview_class ); ?>" src="<?php echo esc_url( $url ); ?>" alt="" />
 	<input type="hidden" id="<?php echo esc_attr( $base ); ?>_input" name="<?php echo esc_attr( $name ); ?>[thumbnail_id]" value="<?php echo esc_attr( (string) $thumb_id ); ?>" />
 	<p class="onthewall-media-actions">
@@ -264,6 +297,35 @@ function onthewall_render_media_control( $base, $name, $thumb_id ) {
 			<?php esc_html_e( 'Rimuovi', 'onthewall' ); ?>
 		</button>
 	</p>
+	<p class="description onthewall-drop-hint"><?php esc_html_e( 'oppure trascina qui l\'immagine dal computer.', 'onthewall' ); ?></p>
+	</div>
+	<?php
+}
+
+/**
+ * Stampa il controllo delle foto aggiuntive (galleria) di un'opera.
+ *
+ * @param string $base       Prefisso per gli id degli elementi (univoco per riga).
+ * @param string $input_name Attributo name del campo con gli ID separati da virgola.
+ * @param int[]  $ids        ID delle foto attuali, nell'ordine di visualizzazione.
+ */
+function onthewall_render_gallery_control( $base, $input_name, $ids ) {
+	?>
+	<div class="onthewall-drop onthewall-gallery-drop" data-target="<?php echo esc_attr( $base ); ?>">
+	<ul id="<?php echo esc_attr( $base ); ?>_gallery_list" class="onthewall-gallery-list">
+		<?php foreach ( $ids as $gallery_id ) : ?>
+			<li data-id="<?php echo esc_attr( (string) $gallery_id ); ?>">
+				<img class="onthewall-wall-thumb" src="<?php echo esc_url( (string) wp_get_attachment_image_url( $gallery_id, 'thumbnail' ) ); ?>" alt="" />
+				<button type="button" class="button-link onthewall-gallery-remove" aria-label="<?php esc_attr_e( 'Rimuovi foto', 'onthewall' ); ?>">&times;</button>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+	<input type="hidden" id="<?php echo esc_attr( $base ); ?>_gallery_input" name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( implode( ',', $ids ) ); ?>" />
+	<button type="button" class="button onthewall-gallery-add" data-target="<?php echo esc_attr( $base ); ?>">
+		<?php esc_html_e( 'Aggiungi foto', 'onthewall' ); ?>
+	</button>
+	<p class="description onthewall-drop-hint"><?php esc_html_e( 'oppure trascina qui le foto dal computer. Trascina le miniature per cambiarne l\'ordine.', 'onthewall' ); ?></p>
+	</div>
 	<?php
 }
 
@@ -276,6 +338,8 @@ function onthewall_render_artwork_manager_row( $artwork ) {
 	$id        = (int) $artwork->ID;
 	$size      = (string) get_post_meta( $id, '_onthewall_size', true );
 	$technique = (string) get_post_meta( $id, '_onthewall_technique', true );
+	$price     = (string) get_post_meta( $id, '_onthewall_price', true );
+	$sold      = (bool) get_post_meta( $id, '_onthewall_sold', true );
 	$thumb_id  = (int) get_post_thumbnail_id( $id );
 	$base      = 'artwork_' . $id;
 	$name      = 'artwork[' . $id . ']';
@@ -283,6 +347,7 @@ function onthewall_render_artwork_manager_row( $artwork ) {
 	<tr>
 		<td class="onthewall-col-image">
 			<?php onthewall_render_media_control( $base, $name, $thumb_id ); ?>
+			<?php onthewall_render_gallery_control( $base, $name . '[gallery]', onthewall_get_gallery_ids( $id ) ); ?>
 		</td>
 		<td>
 			<label class="screen-reader-text" for="<?php echo esc_attr( $base ); ?>_title"><?php esc_html_e( 'Titolo', 'onthewall' ); ?></label>
@@ -293,6 +358,14 @@ function onthewall_render_artwork_manager_row( $artwork ) {
 		</td>
 		<td>
 			<input type="text" class="widefat" name="<?php echo esc_attr( $name ); ?>[technique]" value="<?php echo esc_attr( $technique ); ?>" placeholder="spray · stencil · canvas" />
+		</td>
+		<td>
+			<label class="screen-reader-text" for="<?php echo esc_attr( $base ); ?>_price"><?php esc_html_e( 'Prezzo (€)', 'onthewall' ); ?></label>
+			<input type="number" id="<?php echo esc_attr( $base ); ?>_price" class="small-text" min="0" step="1" name="<?php echo esc_attr( $name ); ?>[price]" value="<?php echo esc_attr( $price ); ?>" <?php echo $sold ? 'readonly' : ''; ?> />
+			<label class="onthewall-sold">
+				<input type="checkbox" name="<?php echo esc_attr( $name ); ?>[sold]" value="1" class="onthewall-sold-toggle" data-price="<?php echo esc_attr( $base ); ?>_price" <?php checked( $sold ); ?> />
+				<?php esc_html_e( 'Venduta', 'onthewall' ); ?>
+			</label>
 		</td>
 		<td>
 			<input type="number" class="small-text" name="<?php echo esc_attr( $name ); ?>[order]" value="<?php echo esc_attr( (string) (int) $artwork->menu_order ); ?>" />
@@ -343,6 +416,7 @@ function onthewall_render_artwork_manager_page() {
 						<th scope="col"><?php esc_html_e( 'Titolo', 'onthewall' ); ?></th>
 						<th scope="col"><?php esc_html_e( 'Misura', 'onthewall' ); ?></th>
 						<th scope="col"><?php esc_html_e( 'Tecnica', 'onthewall' ); ?></th>
+						<th scope="col" class="onthewall-col-price"><?php esc_html_e( 'Prezzo (€)', 'onthewall' ); ?></th>
 						<th scope="col" class="onthewall-col-order"><?php esc_html_e( 'Ordine', 'onthewall' ); ?></th>
 						<th scope="col" class="onthewall-col-delete"><?php esc_html_e( 'Elimina', 'onthewall' ); ?></th>
 					</tr>
@@ -351,7 +425,7 @@ function onthewall_render_artwork_manager_page() {
 					<?php
 					if ( empty( $artworks ) ) {
 						printf(
-							'<tr><td colspan="6">%s</td></tr>',
+							'<tr><td colspan="7">%s</td></tr>',
 							esc_html__( 'Nessuna opera presente. La home mostra le opere di default finché non ne aggiungi una qui sotto.', 'onthewall' )
 						);
 					}
@@ -371,6 +445,10 @@ function onthewall_render_artwork_manager_page() {
 						<td><?php onthewall_render_media_control( 'artwork_new', 'artwork_new', 0 ); ?></td>
 					</tr>
 					<tr>
+						<th scope="row"><?php esc_html_e( 'Altre foto', 'onthewall' ); ?></th>
+						<td><?php onthewall_render_gallery_control( 'artwork_new', 'artwork_new[gallery]', array() ); ?></td>
+					</tr>
+					<tr>
 						<th scope="row">
 							<label for="artwork_new_title"><?php esc_html_e( 'Titolo', 'onthewall' ); ?></label>
 						</th>
@@ -387,6 +465,19 @@ function onthewall_render_artwork_manager_page() {
 							<label for="artwork_new_technique"><?php esc_html_e( 'Tecnica', 'onthewall' ); ?></label>
 						</th>
 						<td><input type="text" id="artwork_new_technique" class="regular-text" name="artwork_new[technique]" value="" placeholder="spray · stencil · canvas" /></td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="artwork_new_price"><?php esc_html_e( 'Prezzo (€)', 'onthewall' ); ?></label>
+						</th>
+						<td>
+							<input type="number" id="artwork_new_price" class="small-text" min="0" step="1" name="artwork_new[price]" value="200" />
+							<label class="onthewall-sold">
+								<input type="checkbox" name="artwork_new[sold]" value="1" class="onthewall-sold-toggle" data-price="artwork_new_price" />
+								<?php esc_html_e( 'Venduta', 'onthewall' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Lascia vuoto per non mostrare il prezzo.', 'onthewall' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row">

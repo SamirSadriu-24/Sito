@@ -90,6 +90,38 @@ function onthewall_register_artwork_meta() {
 			},
 		)
 	);
+
+	// Foto aggiuntive (ID allegati separati da virgola), dopo l'immagine in evidenza.
+	register_post_meta(
+		'artwork',
+		'_onthewall_gallery',
+		array(
+			'type'              => 'string',
+			'description'       => esc_html__( 'Altre foto', 'onthewall' ),
+			'single'            => true,
+			'default'           => '',
+			'sanitize_callback' => 'onthewall_sanitize_gallery',
+			'auth_callback'     => function () {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+
+	// Venduta: la card mostra SOLD al posto del prezzo, che resta salvato.
+	register_post_meta(
+		'artwork',
+		'_onthewall_sold',
+		array(
+			'type'              => 'boolean',
+			'description'       => esc_html__( 'Venduta', 'onthewall' ),
+			'single'            => true,
+			'default'           => false,
+			'sanitize_callback' => 'rest_sanitize_boolean',
+			'auth_callback'     => function () {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
 }
 add_action( 'init', 'onthewall_register_artwork_meta' );
 
@@ -103,6 +135,29 @@ function onthewall_sanitize_price( $value ) {
 	$value = trim( (string) $value );
 
 	return '' === $value ? '' : absint( $value );
+}
+
+/**
+ * Galleria: tiene solo ID di immagini esistenti, senza doppioni, nell'ordine dato.
+ *
+ * @param mixed $value Stringa "12,15,18" o array di ID.
+ * @return string
+ */
+function onthewall_sanitize_gallery( $value ) {
+	$ids = is_array( $value ) ? $value : explode( ',', (string) $value );
+	$ids = array_unique( array_filter( array_map( 'absint', $ids ), 'wp_attachment_is_image' ) );
+
+	return implode( ',', $ids );
+}
+
+/**
+ * ID delle foto aggiuntive di un'opera.
+ *
+ * @param int $post_id ID dell'opera.
+ * @return int[]
+ */
+function onthewall_get_gallery_ids( $post_id ) {
+	return array_values( array_filter( array_map( 'absint', explode( ',', (string) get_post_meta( $post_id, '_onthewall_gallery', true ) ) ) ) );
 }
 
 /**
@@ -131,6 +186,7 @@ function onthewall_render_artwork_meta_box( $post ) {
 	$size      = (string) get_post_meta( $post->ID, '_onthewall_size', true );
 	$technique = (string) get_post_meta( $post->ID, '_onthewall_technique', true );
 	$price     = (string) get_post_meta( $post->ID, '_onthewall_price', true );
+	$sold      = (bool) get_post_meta( $post->ID, '_onthewall_sold', true );
 	?>
 	<p>
 		<label for="onthewall-size"><strong><?php esc_html_e( 'Misura', 'onthewall' ); ?></strong></label><br />
@@ -145,9 +201,18 @@ function onthewall_render_artwork_meta_box( $post ) {
 	<p>
 		<label for="onthewall-price"><strong><?php esc_html_e( 'Prezzo (€)', 'onthewall' ); ?></strong></label><br />
 		<input type="number" id="onthewall-price" name="onthewall_price" class="widefat" min="0" step="1"
-			value="<?php echo esc_attr( $price ); ?>" />
+			value="<?php echo esc_attr( $price ); ?>" <?php echo $sold ? 'readonly' : ''; ?> />
 		<span class="description"><?php esc_html_e( 'Lascia vuoto per non mostrare il prezzo.', 'onthewall' ); ?></span>
 	</p>
+	<p>
+		<label>
+			<input type="checkbox" name="onthewall_sold" value="1" class="onthewall-sold-toggle" data-price="onthewall-price" <?php checked( $sold ); ?> />
+			<strong><?php esc_html_e( 'Venduta', 'onthewall' ); ?></strong>
+		</label><br />
+		<span class="description"><?php esc_html_e( 'Sulla pagina compare SOLD al posto del prezzo.', 'onthewall' ); ?></span>
+	</p>
+	<p><strong><?php esc_html_e( 'Altre foto', 'onthewall' ); ?></strong></p>
+	<?php onthewall_render_gallery_control( 'onthewall_meta', 'onthewall_gallery', onthewall_get_gallery_ids( $post->ID ) ); ?>
 	<?php
 }
 
@@ -187,5 +252,11 @@ function onthewall_save_artwork_meta( $post_id ) {
 
 	$price = isset( $_POST['onthewall_price'] ) ? onthewall_sanitize_price( wp_unslash( $_POST['onthewall_price'] ) ) : '';
 	update_post_meta( $post_id, '_onthewall_price', $price );
+
+	update_post_meta( $post_id, '_onthewall_sold', ! empty( $_POST['onthewall_sold'] ) );
+
+	if ( isset( $_POST['onthewall_gallery'] ) ) {
+		update_post_meta( $post_id, '_onthewall_gallery', onthewall_sanitize_gallery( wp_unslash( $_POST['onthewall_gallery'] ) ) );
+	}
 }
 add_action( 'save_post_artwork', 'onthewall_save_artwork_meta' );

@@ -96,3 +96,124 @@
 	justify-content: space-between;
 	column-gap: 0.5rem;
 }
+
+/*
+ * Finestra dell'opera: popover HTML nativo (si apre e si chiude senza JS).
+ * Le foto scorrono con lo scroll-snap; frecce = link alle ancore delle foto.
+ */
+.lightbox-trigger {
+	display: block;
+	width: 100%;
+	padding: 0;
+	cursor: zoom-in;
+}
+
+.lightbox-trigger:focus-visible,
+.lightbox-close:focus-visible,
+.lightbox-track:focus-visible,
+.lightbox-nav a:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: 2px;
+}
+
+.lightbox {
+	/* Il reset di main.css azzera il margin:auto con cui il browser centra i popover. */
+	margin: auto;
+	width: min(72rem, 100vw - 2rem);
+	max-height: calc(100dvh - 2rem);
+	padding: 1rem;
+	border: 2px solid var(--foreground);
+	background: var(--card);
+	color: var(--card-foreground);
+}
+
+.lightbox:popover-open {
+	display: grid;
+	gap: 1rem;
+	align-items: start;
+}
+
+.lightbox::backdrop {
+	background: color-mix(in oklab, var(--foreground) 85%, transparent);
+}
+
+/* La pagina sotto non scorre mentre la finestra è aperta. */
+body:has(.lightbox:popover-open) {
+	overflow: hidden;
+}
+
+.lightbox-close {
+	justify-self: end;
+	padding: 0.25rem 0;
+	cursor: pointer;
+}
+
+.lightbox-close:hover,
+.lightbox-nav a:hover {
+	color: var(--primary);
+}
+
+.lightbox-track {
+	display: flex;
+	/* Lo spazio nasconde il pixel della foto vicina che gli arrotondamenti dello scroll lasciano sporgere. */
+	gap: 1rem;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	/* Niente scroll-behavior: smooth: dentro il popover blocca il salto alle ancore delle frecce. */
+	overscroll-behavior-x: contain;
+	/* Si scorre con swipe, frecce o tastiera: la barra sarebbe solo rumore. */
+	scrollbar-width: none;
+}
+
+.lightbox-track::-webkit-scrollbar {
+	display: none;
+}
+
+.lightbox-slide {
+	flex: 0 0 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.75rem;
+	margin: 0;
+	scroll-snap-align: center;
+}
+
+/*
+ * Riquadro della foto ad altezza fissa (la foto ci sta dentro intera): così la barra
+ * delle frecce sotto resta nello stesso punto qualunque sia la proporzione della foto.
+ * Sui telefoni il riquadro è circa quadrato, sugli schermi grandi alto al massimo il 70%.
+ */
+.lightbox-slide img {
+	width: 100%;
+	height: min(70dvh, 100vw - 4rem);
+	object-fit: contain;
+}
+
+/* Tre colonne fisse: freccia, contatore, freccia. */
+.lightbox-nav {
+	display: grid;
+	grid-template-columns: 2.5rem 4.5rem 2.5rem;
+	align-items: center;
+	justify-items: center;
+}
+
+.lightbox-nav a {
+	font-size: 1.25rem;
+	text-decoration: none;
+}
+
+/* Da 48rem: foto a sinistra, dettagli a destra; il pulsante Chiudi resta sopra entrambi. */
+@media (width >= 48rem) {
+	.lightbox:popover-open {
+		grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+	}
+
+	.lightbox-close {
+		grid-column: 1 / -1;
+	}
+
+	.lightbox-details {
+		padding-top: 1rem;
+	}
+}

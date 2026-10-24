@@ -6,12 +6,13 @@ o la procedura di verifica.
 
 ## Modifiche richieste dal cliente (ottobre 2026)
 
-Le issue #4, #5 e #6 e le richieste del 17–19/10 sono richieste del cliente che
+Le issue #4, #5 e #6 e le richieste del 17–19/10 e del 22–23/10 sono richieste che
 cambiano la preview approvata. Sono **eccezioni volute** alla regola del design
 congelato (vedi `CLAUDE.md`): non vanno "corrette" per riallinearsi alla preview.
 
 Le issue #4–#6 toccano `OnTheWall/template-parts/section-about.php`; le
-richieste del 17–19/10 anche header, card delle opere e Commissions.
+richieste del 17–19/10 anche header, card delle opere e Commissions; quelle del
+22–23/10 card delle opere, la nuova finestra dell'opera e la bacheca.
 
 ### Decise il 16/10/2026
 
@@ -40,7 +41,20 @@ richieste del 17–19/10 anche header, card delle opere e Commissions.
 | About mobile | Sotto `md` (48rem) il logo sta a destra del titolo | La colonna del testo diventa `display: contents` (regola `@media (width < 48rem)` su `#about` in `theme.css`): titolo e logo nella prima riga della griglia, paragrafo e CTA a larghezza piena. Il logo è circa il 42% del contenitore e si riduce se non c'è spazio (81 px a 320 px). Tablet e desktop invariati: 0 pixel diversi a 768, 820 e 1440 px. |
 | The Wall | Prezzo per opera, meta `_onthewall_price` (intero in euro, default registrato 200) | Campo "Prezzo (€)" nel box dell'opera. Senza valore salvato vale 200; salvato vuoto, la card non mostra il prezzo. Le 10 opere di riserva hanno `price => 200`. Nella card (`.card-meta-row`) il prezzo è in basso a destra, rosso e in grassetto, sulla baseline della tecnica; con una tecnica lunga va a capo, sotto a destra: accettato dall'utente. |
 
+### Decise il 22–23/10/2026 (branch `the-wall-venduto-galleria`)
+
+| Area | Decisione | Note per chi viene dopo |
+|---|---|---|
+| Gestisci The Wall | Prezzo modificabile anche nella schermata in blocco, colonna "Prezzo (€)" e campo nel modulo della nuova opera (precompilato con 200) | Stessa sanitizzazione del box dell'opera (`onthewall_sanitize_price()`). Un campo prezzo assente dal POST lascia il valore invariato; vuoto = nessun prezzo. |
+| The Wall | Casella **Venduta**, meta `_onthewall_sold` (booleano): la card mostra **SOLD** al posto del prezzo | SOLD usa lo stesso posto e lo stesso stile del prezzo (mono, grassetto, `text-primary`): nessun elemento grafico nuovo. Il prezzo resta salvato e in bacheca diventa di sola lettura (`readonly`, non `disabled`, così viene comunque inviato). L'etichetta prezzo/SOLD è calcolata in un punto solo, `onthewall_artwork_price_label()`. |
+| The Wall | Più foto per opera, meta `_onthewall_gallery` (ID separati da virgola). Clic sulla foto della card → **finestra dell'opera** con le foto grandi che scorrono e i dettagli (titolo, misura, tecnica, prezzo o SOLD) | **Componente nuovo, non presente nella preview**: chiesto dall'utente, disegnato solo con colori, font e classi del tema; da mostrare al cliente. La foto della card resta l'immagine in evidenza ed è la prima della finestra. Il front-end resta **senza JavaScript**: la finestra è un popover HTML nativo, le foto scorrono con lo scroll-snap, le frecce sono link alle ancore delle foto. Niente `scroll-behavior: smooth` sul contenitore (dentro il popover blocca le frecce) e `margin: auto` esplicito sul popover (il reset di `main.css` toglie il centraggio). Riquadro foto ad altezza fissa e frecce su tre colonne fisse: la barra delle frecce non si sposta con le proporzioni della foto. Da 48rem foto a sinistra e dettagli a destra, sotto una colonna. |
+| Bacheca | Foto caricabili **trascinandole dal computer** sull'immagine principale (usa solo la prima) e sulla galleria; miniature della galleria **riordinabili** trascinandole | Solo in wp-admin: caricamento con l'API REST (`wp-api-fetch`), riordino con `jquery-ui-sortable`, entrambi inclusi in WordPress. Un file rilasciato fuori dai riquadri non fa più aprire l'immagine al browser (si perderebbe il modulo). Caricare richiede il permesso `upload_files`. Nella modifica singola l'immagine principale resta il box standard "Immagine in evidenza" di WordPress. |
+
+Le modifiche del 22–23/10 sono state provate sul Playground locale (salvataggi, finestra a 375 e 1280 px, frecce, chiusura con Esc / pulsante / clic fuori). La verifica di fedeltà della procedura di `CLAUDE.md` **non è stata ripetuta**.
+
 ### Da decidere
+
+- **Finestra dell'opera e SOLD.** Vanno fatti vedere al cliente: aspetto della finestra (componente nuovo) e se SOLD deve essere più evidente del prezzo (per esempio un timbro sulla foto).
 
 - **Nuovo riferimento per la verifica di fedeltà.** Si sceglie tra una nuova preview approvata e la vecchia preview con l'elenco delle differenze qui sopra. Finché non si decide, il "121 elementi, 0 differenze" di `CLAUDE.md` vale solo per il tema prima delle modifiche del cliente (`05dc932`).
 - **#5, file definitivo del logo.** Ora c'è un JPEG corretto (`logo-misfit-toy-corretto.jpg`, senza le linee nere ai bordi), ma ha ancora il fondo bianco: l'originale in SVG o PNG trasparente non è ancora arrivato. Quando arriva: sostituire il file nell'hero e nell'header, togliere `mix-blend-multiply` dalle due `<img>` e la regola da `theme.css`, e rivedere `.logo-crop`, tarato sui margini bianchi del JPEG. A quel punto si può rimettere `z-10` su `#about` e sull'header.

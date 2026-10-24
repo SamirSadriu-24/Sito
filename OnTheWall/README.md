@@ -38,12 +38,25 @@ languages/                   file di traduzione
 
 ### Opere ("The Wall")
 
-Le opere si gestiscono dal menu **Opere** in bacheca (custom post type `artwork`):
+Le opere si gestiscono dal menu **Opere** in bacheca (custom post type `artwork`).
+Il modo più rapido è **Opere → Gestisci The Wall**: tutte le opere in una tabella, un solo
+salvataggio, più il modulo per aggiungerne una nuova. In alternativa si modifica un'opera alla volta.
 
 - **Titolo** → nome dell'opera
-- **Immagine in evidenza** → immagine della card (formato quadrato, 640×640)
-- **Dettagli opera** (colonna laterale) → *Misura* (es. `80×80`) e *Tecnica* (es. `spray · stencil · canvas`)
-- **Ordine** (Attributi pagina) → posizione nella griglia
+- **Immagine principale** (Immagine in evidenza) → immagine della card, ritagliata quadrata 640×640,
+  e prima foto della finestra dell'opera
+- **Altre foto** → foto aggiuntive mostrate nella finestra dell'opera, nell'ordine delle miniature
+- **Misura** (es. `80×80`) e **Tecnica** (es. `spray · stencil · canvas`)
+- **Prezzo (€)** → intero, 200 se non impostato; vuoto = nessun prezzo sulla card
+- **Venduta** → la card mostra SOLD al posto del prezzo; il prezzo resta salvato e non si modifica
+- **Ordine** → posizione nella griglia
+
+In *Gestisci The Wall* le foto si possono anche **trascinare dal computer** sul riquadro
+dell'immagine principale o di "Altre foto", e le miniature di "Altre foto" si **riordinano**
+trascinandole. Le modifiche valgono dopo **Salva tutte le opere**.
+
+Sul sito, clic sulla foto di una card → **finestra dell'opera**: foto grandi da scorrere (swipe,
+frecce, tastiera) e dettagli. Si chiude con *Chiudi*, Esc o clic fuori. Funziona senza JavaScript.
 
 Finché non viene pubblicata nessuna opera, la griglia mostra le 10 opere di default della preview,
 definite in `inc/template-tags.php` (`onthewall_default_artworks()`).
