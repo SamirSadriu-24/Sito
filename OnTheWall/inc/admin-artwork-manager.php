@@ -156,6 +156,7 @@ function onthewall_handle_artwork_manager_save() {
 
 		update_post_meta( $id, '_onthewall_size', isset( $data['size'] ) ? sanitize_text_field( $data['size'] ) : '' );
 		update_post_meta( $id, '_onthewall_technique', isset( $data['technique'] ) ? sanitize_text_field( $data['technique'] ) : '' );
+		update_post_meta( $id, '_onthewall_description', isset( $data['description'] ) ? sanitize_textarea_field( $data['description'] ) : '' );
 
 		// Vuoto = nessun prezzo in card; campo assente = prezzo invariato.
 		if ( isset( $data['price'] ) ) {
@@ -201,6 +202,7 @@ function onthewall_handle_artwork_manager_save() {
 		if ( $new_id && ! is_wp_error( $new_id ) ) {
 			update_post_meta( $new_id, '_onthewall_size', isset( $new['size'] ) ? sanitize_text_field( $new['size'] ) : '' );
 			update_post_meta( $new_id, '_onthewall_technique', isset( $new['technique'] ) ? sanitize_text_field( $new['technique'] ) : '' );
+			update_post_meta( $new_id, '_onthewall_description', isset( $new['description'] ) ? sanitize_textarea_field( $new['description'] ) : '' );
 
 			if ( isset( $new['price'] ) ) {
 				update_post_meta( $new_id, '_onthewall_price', onthewall_sanitize_price( $new['price'] ) );
@@ -335,14 +337,15 @@ function onthewall_render_gallery_control( $base, $input_name, $ids ) {
  * @param WP_Post $artwork Opera da modificare.
  */
 function onthewall_render_artwork_manager_row( $artwork ) {
-	$id        = (int) $artwork->ID;
-	$size      = (string) get_post_meta( $id, '_onthewall_size', true );
-	$technique = (string) get_post_meta( $id, '_onthewall_technique', true );
-	$price     = (string) get_post_meta( $id, '_onthewall_price', true );
-	$sold      = (bool) get_post_meta( $id, '_onthewall_sold', true );
-	$thumb_id  = (int) get_post_thumbnail_id( $id );
-	$base      = 'artwork_' . $id;
-	$name      = 'artwork[' . $id . ']';
+	$id          = (int) $artwork->ID;
+	$size        = (string) get_post_meta( $id, '_onthewall_size', true );
+	$technique   = (string) get_post_meta( $id, '_onthewall_technique', true );
+	$description = (string) get_post_meta( $id, '_onthewall_description', true );
+	$price       = (string) get_post_meta( $id, '_onthewall_price', true );
+	$sold        = (bool) get_post_meta( $id, '_onthewall_sold', true );
+	$thumb_id    = (int) get_post_thumbnail_id( $id );
+	$base        = 'artwork_' . $id;
+	$name        = 'artwork[' . $id . ']';
 	?>
 	<tr>
 		<td class="onthewall-col-image">
@@ -352,6 +355,9 @@ function onthewall_render_artwork_manager_row( $artwork ) {
 		<td>
 			<label class="screen-reader-text" for="<?php echo esc_attr( $base ); ?>_title"><?php esc_html_e( 'Titolo', 'onthewall' ); ?></label>
 			<input type="text" id="<?php echo esc_attr( $base ); ?>_title" class="widefat" name="<?php echo esc_attr( $name ); ?>[title]" value="<?php echo esc_attr( $artwork->post_title ); ?>" />
+			<?php // Sotto il titolo e non in una colonna sua: la tabella ha già sette colonne. ?>
+			<label class="screen-reader-text" for="<?php echo esc_attr( $base ); ?>_description"><?php esc_html_e( 'Descrizione', 'onthewall' ); ?></label>
+			<textarea id="<?php echo esc_attr( $base ); ?>_description" class="widefat" rows="3" name="<?php echo esc_attr( $name ); ?>[description]" placeholder="<?php esc_attr_e( 'Descrizione (compare nella finestra dell\'opera)', 'onthewall' ); ?>"><?php echo esc_textarea( $description ); ?></textarea>
 		</td>
 		<td>
 			<input type="text" class="widefat" name="<?php echo esc_attr( $name ); ?>[size]" value="<?php echo esc_attr( $size ); ?>" placeholder="80×80" />
@@ -393,8 +399,12 @@ function onthewall_render_artwork_manager_page() {
 			'post_type'   => 'artwork',
 			'post_status' => array( 'publish', 'draft', 'pending', 'private', 'future' ),
 			'numberposts' => -1,
-			'orderby'     => 'menu_order',
-			'order'       => 'ASC',
+			// Stesso ordine della home, altrimenti qui la nuova opera finisce
+			// in fondo e sul sito in cima. Vedi onthewall_get_artworks().
+			'orderby'     => array(
+				'menu_order' => 'ASC',
+				'date'       => 'DESC',
+			),
 		)
 	);
 	?>
@@ -453,6 +463,15 @@ function onthewall_render_artwork_manager_page() {
 							<label for="artwork_new_title"><?php esc_html_e( 'Titolo', 'onthewall' ); ?></label>
 						</th>
 						<td><input type="text" id="artwork_new_title" class="regular-text" name="artwork_new[title]" value="" /></td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="artwork_new_description"><?php esc_html_e( 'Descrizione', 'onthewall' ); ?></label>
+						</th>
+						<td>
+							<textarea id="artwork_new_description" class="large-text" rows="4" name="artwork_new[description]"></textarea>
+							<p class="description"><?php esc_html_e( 'Compare nella finestra dell\'opera. Lascia vuoto per non mostrarla.', 'onthewall' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row">
