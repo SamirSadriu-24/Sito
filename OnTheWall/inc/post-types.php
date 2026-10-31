@@ -49,12 +49,29 @@ function onthewall_register_artwork_post_type() {
 add_action( 'init', 'onthewall_register_artwork_post_type' );
 
 /**
- * Registra i meta dell'opera (misura e tecnica).
+ * Registra i meta dell'opera (misura, tecnica e descrizione).
  */
 function onthewall_register_artwork_meta() {
 	$meta = array(
 		'_onthewall_size'      => esc_html__( 'Misura', 'onthewall' ),
 		'_onthewall_technique' => esc_html__( 'Tecnica', 'onthewall' ),
+	);
+
+	// La descrizione è su più righe, quindi ha una sanitizzazione sua.
+	register_post_meta(
+		'artwork',
+		'_onthewall_description',
+		array(
+			'type'              => 'string',
+			'description'       => esc_html__( 'Descrizione', 'onthewall' ),
+			'single'            => true,
+			'default'           => '',
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'sanitize_textarea_field',
+			'auth_callback'     => function () {
+				return current_user_can( 'edit_posts' );
+			},
+		)
 	);
 
 	foreach ( $meta as $key => $label ) {
@@ -183,10 +200,11 @@ add_action( 'add_meta_boxes', 'onthewall_add_artwork_meta_box' );
 function onthewall_render_artwork_meta_box( $post ) {
 	wp_nonce_field( 'onthewall_save_artwork_meta', 'onthewall_artwork_nonce' );
 
-	$size      = (string) get_post_meta( $post->ID, '_onthewall_size', true );
-	$technique = (string) get_post_meta( $post->ID, '_onthewall_technique', true );
-	$price     = (string) get_post_meta( $post->ID, '_onthewall_price', true );
-	$sold      = (bool) get_post_meta( $post->ID, '_onthewall_sold', true );
+	$size        = (string) get_post_meta( $post->ID, '_onthewall_size', true );
+	$technique   = (string) get_post_meta( $post->ID, '_onthewall_technique', true );
+	$description = (string) get_post_meta( $post->ID, '_onthewall_description', true );
+	$price       = (string) get_post_meta( $post->ID, '_onthewall_price', true );
+	$sold        = (bool) get_post_meta( $post->ID, '_onthewall_sold', true );
 	?>
 	<p>
 		<label for="onthewall-size"><strong><?php esc_html_e( 'Misura', 'onthewall' ); ?></strong></label><br />
@@ -197,6 +215,11 @@ function onthewall_render_artwork_meta_box( $post ) {
 		<label for="onthewall-technique"><strong><?php esc_html_e( 'Tecnica', 'onthewall' ); ?></strong></label><br />
 		<input type="text" id="onthewall-technique" name="onthewall_technique" class="widefat"
 			value="<?php echo esc_attr( $technique ); ?>" placeholder="spray · stencil · canvas" />
+	</p>
+	<p>
+		<label for="onthewall-description"><strong><?php esc_html_e( 'Descrizione', 'onthewall' ); ?></strong></label><br />
+		<textarea id="onthewall-description" name="onthewall_description" class="widefat" rows="4"><?php echo esc_textarea( $description ); ?></textarea>
+		<span class="description"><?php esc_html_e( 'Compare nella finestra dell\'opera. Lascia vuoto per non mostrarla.', 'onthewall' ); ?></span>
 	</p>
 	<p>
 		<label for="onthewall-price"><strong><?php esc_html_e( 'Prezzo (€)', 'onthewall' ); ?></strong></label><br />
@@ -249,6 +272,11 @@ function onthewall_save_artwork_meta( $post_id ) {
 		$value = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
 		update_post_meta( $post_id, $meta_key, $value );
 	}
+
+	$description = isset( $_POST['onthewall_description'] )
+		? sanitize_textarea_field( wp_unslash( $_POST['onthewall_description'] ) )
+		: '';
+	update_post_meta( $post_id, '_onthewall_description', $description );
 
 	$price = isset( $_POST['onthewall_price'] ) ? onthewall_sanitize_price( wp_unslash( $_POST['onthewall_price'] ) ) : '';
 	update_post_meta( $post_id, '_onthewall_price', $price );

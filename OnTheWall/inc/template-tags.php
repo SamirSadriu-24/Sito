@@ -156,8 +156,16 @@ function onthewall_get_artworks() {
 			'post_type'              => 'artwork',
 			'post_status'            => 'publish',
 			'posts_per_page'         => -1,
-			'orderby'                => 'menu_order date',
-			'order'                  => 'ASC',
+			/*
+			 * "Ordine" resta il criterio principale, così il riordino a mano
+			 * continua a funzionare. A parità di Ordine (il caso normale: tutte
+			 * a 0) vince la più recente, quindi l'ultima opera caricata compare
+			 * per prima.
+			 */
+			'orderby'                => array(
+				'menu_order' => 'ASC',
+				'date'       => 'DESC',
+			),
 			'ignore_sticky_posts'    => true,
 			'no_found_rows'          => true,
 			'update_post_term_cache' => false,
@@ -193,13 +201,14 @@ function onthewall_get_artworks() {
 			}
 
 			$items[] = array(
-				'photos'     => array_filter( $photos ),
-				'title'      => $title,
-				'size'       => (string) get_post_meta( $post->ID, '_onthewall_size', true ),
-				'technique'  => (string) get_post_meta( $post->ID, '_onthewall_technique', true ),
-				'price'      => get_post_meta( $post->ID, '_onthewall_price', true ),
-				'sold'       => (bool) get_post_meta( $post->ID, '_onthewall_sold', true ),
-				'image_html' => $image_html,
+				'photos'      => array_filter( $photos ),
+				'title'       => $title,
+				'size'        => (string) get_post_meta( $post->ID, '_onthewall_size', true ),
+				'technique'   => (string) get_post_meta( $post->ID, '_onthewall_technique', true ),
+				'description' => (string) get_post_meta( $post->ID, '_onthewall_description', true ),
+				'price'       => get_post_meta( $post->ID, '_onthewall_price', true ),
+				'sold'        => (bool) get_post_meta( $post->ID, '_onthewall_sold', true ),
+				'image_html'  => $image_html,
 			);
 		}
 

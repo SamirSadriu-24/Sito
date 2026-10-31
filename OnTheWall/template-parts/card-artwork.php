@@ -101,6 +101,11 @@ $onthewall_box_id      = 'opera-' . ( $onthewall_index + 1 );
 		<?php if ( ! empty( $onthewall_artwork['technique'] ) ) : ?>
 			<p class="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground"><?php echo esc_html( $onthewall_artwork['technique'] ); ?></p>
 		<?php endif; ?>
+		<?php if ( ! empty( $onthewall_artwork['description'] ) ) : ?>
+			<p class="mt-5 max-w-[46ch] text-pretty leading-relaxed">
+				<?php echo nl2br( esc_html( $onthewall_artwork['description'] ) ); ?>
+			</p>
+		<?php endif; ?>
 		<?php if ( '' !== $onthewall_price_label ) : ?>
 			<p class="mt-6 font-display text-2xl tracking-tight text-primary"><?php echo esc_html( $onthewall_price_label ); ?></p>
 		<?php endif; ?>
